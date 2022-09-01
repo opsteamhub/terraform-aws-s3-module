@@ -11,6 +11,9 @@ module "opsteam-testecase-01-cors" {
           max_age_seconds = 3001
         }
       ]
+    },
+    { 
+      bucket_name = "opsteam-testecase-001-nocors" 
     }
   ]
 }
