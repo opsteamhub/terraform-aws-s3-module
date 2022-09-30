@@ -57,6 +57,110 @@ variable "bucket_config" {
       max_age_seconds = optional(string)
     })))
 
+    # Lifecycle
+    lifecycle_config = optional(
+      object(
+        {
+          expected_bucket_owner = optional(string)
+          rule = optional(
+            set(
+              object(
+                {
+                  abort_incomplete_multipart_upload = optional(
+                    object(
+                      {
+                        days_after_initiation = optional(string)
+                      }
+                    )
+                  )
+                  expiration = optional(
+                    object(
+                      {
+                        date = optional(string)
+                        days = optional(string)
+                        expired_object_delete_marker = optional(bool)
+                      }
+                    )
+                  )
+                
+                  filter = optional(
+                    object(
+                      {
+                        and = optional(
+                          set(
+                            object(
+                              {
+                                object_size_greater_than = optional(string)
+                                object_size_less_than  = optional(string)
+                                prefix  = optional(string)
+                                tag = optional( 
+                                   set(
+                                     object(
+                                      {
+                                        key  = optional(string)
+                                        value  = optional(string)
+                                      }
+                                    )
+                                  )
+                                )
+                              }
+                            )
+                          )
+                        )
+                        object_size_greater_than = optional(string)
+                        object_size_less_than  = optional(string)
+                        prefix  = optional(string)
+                        tag = optional( 
+                          set(
+                            object(
+                              {
+                                key  = optional(string)
+                                value  = optional(string)
+                              }
+                            )
+                          )
+                        )            
+                      }
+                    )
+                  )
+          
+                  id = optional(string)
+                  noncurrent_version_expiration = optional(
+                    object(
+                      {
+                        newer_noncurrent_versions = optional(string)
+                        noncurrent_days = optional(string)
+                      }
+                    )
+                  )          
+                  noncurrent_version_transition = optional(
+                    object(
+                      {
+                        newer_noncurrent_versions = optional(string)
+                        noncurrent_days = optional(string)
+                        storage_class  = optional(string)
+                      }
+                    )
+                  )
+                  status = optional(string)
+                  transition  = optional(
+                    object(
+                      {
+                        date = optional(string)
+                        days = optional(string)
+                        storage_class = optional(string)
+                      }
+                    )
+                  )
+                }
+              )
+            )
+          )
+        }
+      )
+    )
+
+
     logging_config   = optional(object({
       expected_bucket_owner = optional(string)
       target_bucket         = optional(string)
@@ -89,6 +193,11 @@ variable "bucket_config" {
       bucket_key_enabled  = optional(bool)
     })) 
 
+
+    #
+    # Parameter to define versioning configurations. By default 
+    # versioning is disabled. 
+    #
     versioning_configuration = optional(object({
       status                = optional(string)
       expected_bucket_owner = optional(string)
@@ -103,10 +212,14 @@ variable "bucket_config" {
       }))    
       #redirect_all_requests_to
       routing_rule = optional(set(object({
+
+        
         condition = optional(object({
           http_error_code_returned_equals = optional(string)
           key_prefix_equals               = optional(string)
         }))
+
+
         redirect = optional(object({
           host_name               = optional(string)
           http_redirect_code      = optional(string)
@@ -119,3 +232,4 @@ variable "bucket_config" {
 
   }))
 }
+

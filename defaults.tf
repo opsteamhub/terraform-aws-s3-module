@@ -49,7 +49,7 @@ locals {
   }
 
 
-  bucket_config = { for k, v in zipmap(local.bucket_names, var.bucket_config):
+  bucket_config = { for k,v in zipmap(local.bucket_names, var.bucket_config):
     k => {
 
       acl = {
@@ -77,6 +77,122 @@ locals {
           max_age_seconds = item["max_age_seconds"] 
         }
       ]
+
+
+
+
+
+
+
+
+
+
+
+
+    lifecycle_config = {
+      expected_bucket_owner = try(v["lifecycle_config"]["expected_bucket_owner"], null)
+      rule = { for x in v["lifecycle_config"]["rule"]:
+        {
+          abort_incomplete_multipart_upload = {
+            days_after_initiation = try(x["abort_incomplete_multipart_upload"]["days_after_initiation"], null)
+          }
+
+          expiration = optional(
+                    object(
+                      {
+                        date = optional(string)
+                        days = optional(string)
+                        expired_object_delete_marker = optional(bool)
+                      }
+                    )
+                  )
+                
+                  filter = optional(
+                    object(
+                      {
+                        and = optional(
+                          set(
+                            object(
+                              {
+                                object_size_greater_than = optional(string)
+                                object_size_less_than  = optional(string)
+                                prefix  = optional(string)
+                                tag = optional( 
+                                   set(
+                                     object(
+                                      {
+                                        key  = optional(string)
+                                        value  = optional(string)
+                                      }
+                                    )
+                                  )
+                                )
+                              }
+                            )
+                          )
+                        )
+                        object_size_greater_than = optional(string)
+                        object_size_less_than  = optional(string)
+                        prefix  = optional(string)
+                        tag = optional( 
+                          set(
+                            object(
+                              {
+                                key  = optional(string)
+                                value  = optional(string)
+                              }
+                            )
+                          )
+                        )            
+                      }
+                    )
+                  )
+          
+                  id = optional(string)
+                  noncurrent_version_expiration = optional(
+                    object(
+                      {
+                        newer_noncurrent_versions = optional(string)
+                        noncurrent_days = optional(string)
+                      }
+                    )
+                  )          
+                  noncurrent_version_transition = optional(
+                    object(
+                      {
+                        newer_noncurrent_versions = optional(string)
+                        noncurrent_days = optional(string)
+                        storage_class  = optional(string)
+                      }
+                    )
+                  )
+                  status = optional(string)
+                  transition  = optional(
+                    object(
+                      {
+                        date = optional(string)
+                        days = optional(string)
+                        storage_class = optional(string)
+                      }
+                    )
+                  )
+                }
+              )
+
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
       logging_config = {
         target_bucket = try(v["logging_config"]["target_bucket"], null)
