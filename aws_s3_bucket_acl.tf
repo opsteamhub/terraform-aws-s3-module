@@ -1,8 +1,8 @@
 resource "aws_s3_bucket_acl" "bucket_acl" {
-  for_each = local.bucket_config
+  for_each              = local.bucket_config
   bucket                = each.key
   acl                   = each.value["acl"]["acl"]
-  expected_bucket_owner = each.value["acl"]["expected_bucket_owner"] 
+  expected_bucket_owner = each.value["acl"]["expected_bucket_owner"]
   dynamic "access_control_policy" {
     for_each = each.value["acl"]["access_control_policy"] != null ? [each.value["acl"]["access_control_policy"]] : []
     content {
@@ -19,9 +19,9 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
         }
       }
       owner {
-        id = try( tostring(access_control_policy.value["owner"]), tostring(data.aws_canonical_user_id.current_session.id))
+        id = try(tostring(access_control_policy.value["owner"]), tostring(data.aws_canonical_user_id.current_session.id))
       }
-    }  
+    }
   }
   depends_on = [aws_s3_bucket_public_access_block.public_access_block]
 }

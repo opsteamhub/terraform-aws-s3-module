@@ -1,7 +1,7 @@
 resource "aws_s3_bucket_public_access_block" "public_access_block" {
   for_each = local.bucket_config
 
-  bucket                  = each.key
+  bucket = each.key
 
   block_public_acls       = each.value["bucket_public_access_block"]["block_public_acls"]
   block_public_policy     = each.value["bucket_public_access_block"]["block_public_policy"]

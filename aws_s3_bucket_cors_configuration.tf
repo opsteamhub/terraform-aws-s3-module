@@ -1,9 +1,9 @@
 resource "aws_s3_bucket_cors_configuration" "cors_config" {
-  for_each = { for k,v in local.bucket_config:
+  for_each = { for k, v in local.bucket_config :
     k => v["cors_rule"] if v["cors_rule"] != []
   }
 
-  bucket = each.key 
+  bucket = each.key
 
   dynamic "cors_rule" {
     for_each = each.value

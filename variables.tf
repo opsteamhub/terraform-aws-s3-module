@@ -23,30 +23,30 @@ variable "bucket_config" {
     }))
 
     bucket_policy = optional(object({
-      statement   = optional(set(object({
-        sid = optional(string)
+      statement = optional(set(object({
+        sid        = optional(string)
         effect     = optional(string)
         actions    = optional(set(string))
-        notactions    = optional(set(string))
+        notactions = optional(set(string))
         principals = optional(set(object({
           type        = optional(string)
           identifiers = optional(set(string))
         })))
         not_principals = optional(set(object({
-          type         = optional(string)
-          identifiers  = optional(set(string))
+          type        = optional(string)
+          identifiers = optional(set(string))
         })))
-        resources_prefix  = optional(set(string))
+        resources_prefix = optional(set(string))
       })))
     }))
 
     bucket_public_access_block = optional(object({
-      block_public_acls        = optional(bool)
-      block_public_policy      = optional(bool)
-      ignore_public_acls       = optional(bool)
-      restrict_public_buckets  = optional(bool)
+      block_public_acls       = optional(bool)
+      block_public_policy     = optional(bool)
+      ignore_public_acls      = optional(bool)
+      restrict_public_buckets = optional(bool)
     }))
-    
+
 
     cors_rule = optional(set(object({
       id              = optional(string)
@@ -76,13 +76,13 @@ variable "bucket_config" {
                   expiration = optional(
                     object(
                       {
-                        date = optional(string)
-                        days = optional(string)
+                        date                         = optional(string)
+                        days                         = optional(string)
                         expired_object_delete_marker = optional(bool)
                       }
                     )
                   )
-                
+
                   filter = optional(
                     object(
                       {
@@ -91,14 +91,14 @@ variable "bucket_config" {
                             object(
                               {
                                 object_size_greater_than = optional(string)
-                                object_size_less_than  = optional(string)
-                                prefix  = optional(string)
-                                tag = optional( 
-                                   set(
-                                     object(
+                                object_size_less_than    = optional(string)
+                                prefix                   = optional(string)
+                                tag = optional(
+                                  set(
+                                    object(
                                       {
-                                        key  = optional(string)
-                                        value  = optional(string)
+                                        key   = optional(string)
+                                        value = optional(string)
                                       }
                                     )
                                   )
@@ -108,46 +108,46 @@ variable "bucket_config" {
                           )
                         )
                         object_size_greater_than = optional(string)
-                        object_size_less_than  = optional(string)
-                        prefix  = optional(string)
-                        tag = optional( 
+                        object_size_less_than    = optional(string)
+                        prefix                   = optional(string)
+                        tag = optional(
                           set(
                             object(
                               {
-                                key  = optional(string)
-                                value  = optional(string)
+                                key   = optional(string)
+                                value = optional(string)
                               }
                             )
                           )
-                        )            
+                        )
                       }
                     )
                   )
-          
+
                   id = optional(string)
                   noncurrent_version_expiration = optional(
                     object(
                       {
                         newer_noncurrent_versions = optional(string)
-                        noncurrent_days = optional(string)
+                        noncurrent_days           = optional(string)
                       }
                     )
-                  )          
+                  )
                   noncurrent_version_transition = optional(
                     object(
                       {
                         newer_noncurrent_versions = optional(string)
-                        noncurrent_days = optional(string)
-                        storage_class  = optional(string)
+                        noncurrent_days           = optional(string)
+                        storage_class             = optional(string)
                       }
                     )
                   )
                   status = optional(string)
-                  transition  = optional(
+                  transition = optional(
                     object(
                       {
-                        date = optional(string)
-                        days = optional(string)
+                        date          = optional(string)
+                        days          = optional(string)
                         storage_class = optional(string)
                       }
                     )
@@ -161,11 +161,11 @@ variable "bucket_config" {
     )
 
 
-    logging_config   = optional(object({
+    logging_config = optional(object({
       expected_bucket_owner = optional(string)
       target_bucket         = optional(string)
       target_prefix         = optional(string)
-      target_grant          = optional(object({
+      target_grant = optional(object({
         permission = optional(string)
         grantee = optional(object({
           email_address = optional(string)
@@ -180,18 +180,18 @@ variable "bucket_config" {
       name = optional(string)
       filter = optional(set(object({
         prefix = optional(string)
-        tags = optional(map(string))
+        tags   = optional(map(string))
       })))
     })))
-    
 
-    sse_config  = optional(object({
+
+    sse_config = optional(object({
       apply_server_side_encryption_by_default = optional(object({
         sse_algorithm     = string
         kms_master_key_id = optional(string)
       }))
-      bucket_key_enabled  = optional(bool)
-    })) 
+      bucket_key_enabled = optional(bool)
+    }))
 
 
     #
@@ -206,14 +206,14 @@ variable "bucket_config" {
     website_config = optional(object({
       error_document = optional(object({
         key = optional(string)
-      }))    
+      }))
       index_document = optional(object({
         suffix = optional(string)
-      }))    
+      }))
       #redirect_all_requests_to
       routing_rule = optional(set(object({
 
-        
+
         condition = optional(object({
           http_error_code_returned_equals = optional(string)
           key_prefix_equals               = optional(string)

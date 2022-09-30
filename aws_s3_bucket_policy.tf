@@ -1,15 +1,15 @@
 data "aws_iam_policy_document" "bucket_policy" {
-  for_each = { for k,v in local.bucket_config:
+  for_each = { for k, v in local.bucket_config :
     k => v["bucket_policy"] if v["bucket_policy"] != null
   }
 
   dynamic "statement" {
     for_each = each.value["statement"]
     content {
-      sid       = statement.value["sid"]
-      effect    = statement.value["effect"]
-      actions   = statement.value["actions"]
-      resources = [ for x in coalesce(statement.value["resources_prefix"], []):
+      sid     = statement.value["sid"]
+      effect  = statement.value["effect"]
+      actions = statement.value["actions"]
+      resources = [for x in coalesce(statement.value["resources_prefix"], []) :
         format("%s/%s", aws_s3_bucket.bucket[each.key].arn, x)
       ]
       dynamic "principals" {
@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 resource "aws_s3_bucket_policy" "bucket_policy" {
-  for_each = { for k,v in local.bucket_config:
+  for_each = { for k, v in local.bucket_config :
     k => v["bucket_policy"] if v["bucket_policy"] != null
   }
   bucket = each.key
