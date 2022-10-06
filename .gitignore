@@ -30,3 +30,9 @@ override.tf.json
 
 *.swp
 **/*.swp
+
+# other common files
+*.hcl
+*.backup
+*.out
+*.info

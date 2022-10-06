@@ -1,7 +1,7 @@
 locals {
   bucket_names = var.bucket_config[*]["bucket_name"]
 
-  default_bucket_config = { # Defini as configurações default, que não serão influenciadas pela entrada do usuário
+  default_bucket_config = {
 
     acl = {
       acl                   = "private"
@@ -48,7 +48,7 @@ locals {
 
   }
 
-  bucket_config = { for k, v in zipmap(local.bucket_names, var.bucket_config) : # Pega os dados de dos inputs do usuario, e injeta em um local chamado bucket_config
+  bucket_config = { for k, v in zipmap(local.bucket_names, var.bucket_config) :
     k => {
       acl = {
         acl                   = try(v["acl"]["access_control_policy"], null) == null ? coalesce(try(v["acl"]["acl"], null), local.default_bucket_config["acl"]["acl"]) : null
@@ -75,66 +75,61 @@ locals {
           max_age_seconds = item["max_age_seconds"]
         }
       ]
-
-      # LIFECYCLE CONFIG  - TASK COMECOU AQUI
       lifecycle_config = {
-        expected_bucket_owner = try(v["lifecycle_config"]["expected_bucket_owner"], null) # v = valor que o usuário injetou, para item numero k
-        rule = [ for x in v["lifecycle_config"]["rule"]:        
-        {
-          abort_incomplete_multipart_upload = {
-            days_after_initiation = try(x["abort_incomplete_multipart_upload"]["days_after_initiation"], null)
-          }
-          
-          expiration = {
-            date                         = try(x["expiration"]["date"], null)
-            days                         = try(x["expiration"]["days"], null)
-            expired_object_delete_marker = try(x["expiration"]["expired_object_delete_marker"], null)
-          }
+        expected_bucket_owner = try(v["lifecycle_config"]["expected_bucket_owner"], null)
+        rule = try([for x in v["lifecycle_config"]["rule"] :
+          {
+            abort_incomplete_multipart_upload = {
+              days_after_initiation = try(x["abort_incomplete_multipart_upload"]["days_after_initiation"], null)
+            }
 
-          filter = {
-            # ________________________________________________________________________________________#
-            # Confirmar se essa estrutura para o and está correta
-            and = {
-              object_size_greater_than = try(x["filter"]["and"]["object_size_greater_than"], null)
-              object_size_less_than    = try(x["filter"]["and"]["object_size_less_than"], null)
-              prefix                   = try(x["filter"]["and"]["prefix"], null)
+            expiration = {
+              date                         = try(x["expiration"]["date"], null)
+              days                         = try(x["expiration"]["days"], null)
+              expired_object_delete_marker = try(x["expiration"]["expired_object_delete_marker"], null)
+            }
+
+            filter = {
+              and = {
+                object_size_greater_than = try(x["filter"]["and"]["object_size_greater_than"], null)
+                object_size_less_than    = try(x["filter"]["and"]["object_size_less_than"], null)
+                prefix                   = try(x["filter"]["and"]["prefix"], null)
+                tag = {
+                  key   = try(x["filter"]["and"]["tag"]["key"], null)
+                  value = ry(x["filter"]["and"]["tag"]["value"], null)
+                }
+              }
+              object_size_greater_than = try(x["filter"]["object_size_greater_than"], null)
+              object_size_less_than    = try(x["filter"]["object_size_less_than"], null)
+              prefix                   = try(x["filter"]["prefix"], null)
               tag = {
-                key   = try(x["filter"]["and"]["tag"]["key"], null)
-                value = ry(x["filter"]["and"]["tag"]["value"], null)
+                key   = try(x["filter"]["tag"]["key"], null)
+                value = ry(x["filter"]["tag"]["value"], null)
               }
             }
-            # ________________________________________________________________________________________#
-            object_size_greater_than = try(x["filter"]["object_size_greater_than"], null)
-            object_size_less_than    = try(x["filter"]["object_size_less_than"], null)
-            prefix                   = try(x["filter"]["prefix"], null)
-            tag = {
-              key   = try(x["filter"]["tag"]["key"], null)
-              value = ry(x["filter"]["tag"]["value"], null)
+
+            id = try(x["id"], null)
+
+            noncurrent_version_expiration = {
+              newer_noncurrent_versions = try(x["noncurrent_version_expiration"]["newer_noncurrent_versions"], null)
+              noncurrent_days           = try(x["noncurrent_version_expiration"]["noncurrent_days"], null)
             }
-          } 
 
-          id = try(x["id"], null)
+            noncurrent_version_transition = {
+              newer_noncurrent_versions = try(x["noncurrent_version_transition"]["newer_noncurrent_versions"], null)
+              noncurrent_days           = try(x["noncurrent_version_transition"]["noncurrent_days"], null)
+              storage_class             = try(x["noncurrent_version_transition"]["storage_class"], null)
+            }
 
-          noncurrent_version_expiration = {
-            newer_noncurrent_versions = try(x["noncurrent_version_expiration"]["newer_noncurrent_versions"], null)
-            noncurrent_days           = try(x["noncurrent_version_expiration"]["noncurrent_days"], null)
+            transition = {
+              date          = try(x["transition"]["date"], null)
+              days          = try(x["transition"]["days"], null)
+              storage_class = try(x["transition"]["storage_class"], null)
+            }
           }
-
-          noncurrent_version_transition = {
-            newer_noncurrent_versions = try(x["noncurrent_version_transition"]["newer_noncurrent_versions"], null)
-            noncurrent_days           = try(x["noncurrent_version_transition"]["noncurrent_days"], null)
-            storage_class             = try(x["noncurrent_version_transition"]["storage_class"], null)
-          }
-
-          transition = {
-            date          = try(x["transition"]["date"], null)
-            days          = try(x["transition"]["days"], null)
-            storage_class = try(x["transition"]["storage_class"], null)
-          }
-        }
-      ]
-    }
-    # LIFECYCLE CONFIG  - TASK TERMINOU AQUI
+        ], null)
+      }
+      # LIFECYCLE CONFIG  - TASK TERMINOU AQUI
 
       logging_config = {
         target_bucket         = try(v["logging_config"]["target_bucket"], null)

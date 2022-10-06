@@ -1,5 +1,5 @@
 module "opsteam-testecase-sse-config-01" {
-  source = ".././"
+  source = "../.././"
   bucket_config = [
     {
       bucket_name = "opsteam-testecase-sse-config-01-sses3-true"

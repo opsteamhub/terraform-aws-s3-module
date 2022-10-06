@@ -1,5 +1,5 @@
 module "opsteam-testecase-sse-config-kms" {
-  source = ".././"
+  source = "../.././"
   bucket_config = [
     {
       bucket_name = "opsteam-testecase-sse-config-ssekms-default"

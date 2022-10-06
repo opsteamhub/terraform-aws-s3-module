@@ -1,5 +1,5 @@
 module "opsteam-testecase-01" {
-  source = ".././"
+  source = "../.././"
   bucket_config = [
     {
       bucket_name = "opsteam-testecase-01-a"
@@ -9,8 +9,6 @@ module "opsteam-testecase-01" {
     },
   ]
 }
-
-
 
 output "inputvar" {
   value = module.opsteam-testecase-01.inputvar
@@ -25,5 +23,5 @@ output "for_input" {
 }
 
 output "finalconfig" {
-value = module.opsteam-testecase-01.finalconfig
+  value = module.opsteam-testecase-01.finalconfig
 }

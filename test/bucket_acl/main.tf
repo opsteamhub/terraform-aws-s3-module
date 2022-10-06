@@ -1,5 +1,5 @@
 module "opsteam-testecase-01-acl-public" {
-  source = ".././"
+  source = "../.././"
   bucket_config = [
     {
       bucket_name = "opsteam-testecase-001-acl-public"

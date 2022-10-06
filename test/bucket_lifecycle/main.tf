@@ -1,5 +1,5 @@
 module "opsteam-testecase-01-lifecycle" {
-  source = ".././"
+  source = "../.././"
   bucket_config = [
     { 
       bucket_name = "opsteam-testecase-001-nolifecycle"  # Objeto 1
