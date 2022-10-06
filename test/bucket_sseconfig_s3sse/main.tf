@@ -1,5 +1,5 @@
 module "opsteam-testecase-sse-config-01" {
-  source = "/Users/brunopaiuca/projects/opsteam/terraform-modules/terraform-s3-module"
+  source = ".././"
   bucket_config = [
     {
       bucket_name = "opsteam-testecase-sse-config-01-sses3-true"
