@@ -1,38 +1,57 @@
 module "opsteam-testecase-01-lifecycle" {
   source = "../.././"
   bucket_config = [
+    /*
     { 
-      bucket_name = "opsteam-testecase-001-nolifecycle"  # Objeto 1
+      bucket_name = "opsteam-testecase-001-nolifecycle" 
     },
+    */
     {
-      bucket_name = "opsteam-testecase-001-lifecycle-to-STDIA"  # Objeto 2
+      bucket_name = "opsteam-testecase-001-lifecycle-com-lifecycle-aaaa123456"
       lifecycle_config = {
-        id = "move-logs-to-standard-ia"
         rule = [
-            {
-            id = "config"
-            filter = {
-              prefix = "config/"
-            }
-            noncurrent_version_expiration = {
-              noncurrent_days = 90
-            }
-            noncurrent_version_transition = {
-              noncurrent_days = 30
-              storage_class   = "STANDARD_IA"
-            }
-            noncurrent_version_transition = {
-              noncurrent_days = 60
-              storage_class   = "GLACIER"
-            }
+          {
+            id = "rule-1"
             status = "Enabled"
+            expiration = {
+              days = 100
+            }
+            transition = {
+              days          = 30
+              storage_class = "STANDARD_IA"
+            }
           }
         ]
       }
-    }
+    },
+    {
+      bucket_name = "opsteam-testecase-001-lifecycle-com-lifecycle--aaaa123456-2"
+      lifecycle_config = {
+        rule = [          
+        {
+          id = "tmp"
+
+          filter = {
+            prefix = "tmp/"
+            }
+
+          expiration = {
+            date = "2023-01-13T00:00:00Z"
+          }
+          status = "Disabled"
+        }          
+        ]
+      }
+    },
+
   ]
 }
 
+provider "aws" {
+  profile = "terraformKey"
+}
+
+/*
 output "inputvar" {
   value = module.opsteam-testecase-01-lifecycle.inputvar
 }
@@ -44,8 +63,15 @@ output "bucketnames" {
 output "for_input" {
   value = module.opsteam-testecase-01-lifecycle.for_input
 }
+*/
+
 
 output "finalconfig" {
-value = module.opsteam-testecase-01-lifecycle.finalconfig
+  value = module.opsteam-testecase-01-lifecycle.finalconfig
 }
 
+/*
+output "leitura_entrada"{
+  value = module.opsteam-testecase-01-lifecycle.entrada
+}
+*/

@@ -33,6 +33,10 @@ locals {
       expected_bucket_owner = data.aws_caller_identity.current_session.account_id
     }
 
+    lifecycle_config = {
+      expected_bucket_owner = data.aws_caller_identity.current_session.account_id
+    }
+
     logging_config = {
       expected_bucket_owner = data.aws_caller_identity.current_session.account_id
     }
@@ -76,9 +80,14 @@ locals {
         }
       ]
       lifecycle_config = {
-        expected_bucket_owner = try(v["lifecycle_config"]["expected_bucket_owner"], null)
-        rule = try([for x in v["lifecycle_config"]["rule"] :
+        expected_bucket_owner = coalesce(try(v["lifecycle_config"]["expected_bucket_owner"], null), local.default_bucket_config["lifecycle_config"]["expected_bucket_owner"])
+
+        rule = [for x in try(v["lifecycle_config"]["rule"], []) :
           {
+            id = try(x["id"], null)
+
+            status = try(x["status"], null)
+
             abort_incomplete_multipart_upload = {
               days_after_initiation = try(x["abort_incomplete_multipart_upload"]["days_after_initiation"], null)
             }
@@ -89,45 +98,49 @@ locals {
               expired_object_delete_marker = try(x["expiration"]["expired_object_delete_marker"], null)
             }
 
-            filter = {
+            // Mesma lógica aplicada em noncurrent_version_transition, veja o comentário deste
+            filter =  sum( [for item in tomap({"filter" = x["filter"]}): item!= null ? 0 : 1] )>0 ? null : {
               and = {
                 object_size_greater_than = try(x["filter"]["and"]["object_size_greater_than"], null)
                 object_size_less_than    = try(x["filter"]["and"]["object_size_less_than"], null)
                 prefix                   = try(x["filter"]["and"]["prefix"], null)
                 tag = {
                   key   = try(x["filter"]["and"]["tag"]["key"], null)
-                  value = ry(x["filter"]["and"]["tag"]["value"], null)
+                  value = try(x["filter"]["and"]["tag"]["value"], null)
                 }
               }
               object_size_greater_than = try(x["filter"]["object_size_greater_than"], null)
               object_size_less_than    = try(x["filter"]["object_size_less_than"], null)
               prefix                   = try(x["filter"]["prefix"], null)
-              tag = {
-                key   = try(x["filter"]["tag"]["key"], null)
-                value = ry(x["filter"]["tag"]["value"], null)
-              }
+              // Mesma lógica aplicada em noncurrent_version_transition, veja o comentário deste
+              tag =  sum( [for item in tomap({"tag" = x["filter"]["tag"]}): item!= null ? 0 : 1] )>0 ? null : {
+                  key   = try(x["filter"]["tag"]["key"], null)
+                  value = try(x["filter"]["tag"]["value"], null)
+              }  
             }
-
-            id = try(x["id"], null)
 
             noncurrent_version_expiration = {
               newer_noncurrent_versions = try(x["noncurrent_version_expiration"]["newer_noncurrent_versions"], null)
               noncurrent_days           = try(x["noncurrent_version_expiration"]["noncurrent_days"], null)
             }
 
-            noncurrent_version_transition = {
+
+            # Para garantir que todos somente se houver 1 item não nulo, que esse parametro será definido Se todos forem nulos, o parametro será nulo por inteiro ("noncurrent_version_transition" = null), e não um mapa com elementos nulos dentro ("noncurrent_version_transition" = {"newer_noncurrent_versions" = null,"noncurrent_days"=null, "storage_class"=null  })
+            noncurrent_version_transition =  sum( [for item in tomap({"noncurrent_version_transition" = x["noncurrent_version_transition"]}): item!= null ? 0 : 1] )>0 ? null : {
               newer_noncurrent_versions = try(x["noncurrent_version_transition"]["newer_noncurrent_versions"], null)
               noncurrent_days           = try(x["noncurrent_version_transition"]["noncurrent_days"], null)
               storage_class             = try(x["noncurrent_version_transition"]["storage_class"], null)
-            }
+            }  
 
-            transition = {
+
+            // Mesma lógica aplicada em noncurrent_version_transition, veja o comentário deste
+            transition =  sum( [for item in tomap({"transition" = x["transition"]}): item!= null ? 0 : 1] )>0 ? null : {
               date          = try(x["transition"]["date"], null)
               days          = try(x["transition"]["days"], null)
               storage_class = try(x["transition"]["storage_class"], null)
-            }
+            }           
           }
-        ], null)
+        ]
       }
       # LIFECYCLE CONFIG  - TASK TERMINOU AQUI
 
@@ -196,3 +209,9 @@ output "for_input" {
 output "finalconfig" {
   value = local.bucket_config
 }
+
+/*
+output "finalconfig" {
+  value = local.bucket_config["opsteam-testecase-001-lifecycle-com-lifecycle"]["lifecycle_config"]
+}
+*/

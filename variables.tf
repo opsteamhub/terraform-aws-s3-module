@@ -62,9 +62,13 @@ variable "bucket_config" {
         {
           expected_bucket_owner = optional(string) # The account ID of the expected bucket owner. If the bucket is owned by a different account, the request will fail with an HTTP 403 (Access Denied) error.
           rule = optional(                         # List of configuration blocks describing the rules managing the replication
-            set(
+            list(
               object(
                 {
+                  id = optional(string) # (Required) Unique identifier for the rule. The value cannot be longer than 255 characters.
+
+                  status = optional(string) # (Required) Whether the rule is currently being applied. Valid values: Enabled or Disabled.
+
                   abort_incomplete_multipart_upload = optional( # Configuration block that specifies the days since the initiation of an incomplete multipart upload that Amazon S3 will wait before permanently removing all parts of the upload
                     object(
                       {
@@ -123,7 +127,7 @@ variable "bucket_config" {
                     )
                   )
 
-                  id = optional(string)                     # Unique identifier for the rule. The value cannot be longer than 255 characters.
+
                   noncurrent_version_expiration = optional( # Configuration block that specifies when noncurrent object versions expire
                     object(
                       {
@@ -141,8 +145,8 @@ variable "bucket_config" {
                       }
                     )
                   )
-                  status = optional(string) # (Required) Whether the rule is currently being applied. Valid values: Enabled or Disabled.
-                  transition = optional(    #  Set of configuration blocks that specify when an Amazon S3 object transitions to a specified storage clas
+
+                  transition = optional( #  Set of configuration blocks that specify when an Amazon S3 object transitions to a specified storage clas
                     object(
                       {
                         date          = optional(string) # The date objects are transitioned to the specified storage class. The date value must be in RFC3339 format and set to midnight UTC e.g. 2023-01-13T00:00:00Z.
