@@ -1,32 +1,32 @@
 module "opsteam-testecase-01-nobucketpolicy" {
   source = "../.././"
   bucket_config = [
-    { 
-      bucket_name = "opsteam-testecase-001-nobucketpolicy" 
+    {
+      bucket_name = "opsteam-testecase-001-nobucketpolicy"
     },
-    { 
-      bucket_name   = "opsteam-testecase-001-bucketpolicy"
+    {
+      bucket_name = "opsteam-testecase-001-bucketpolicy"
       bucket_policy = {
-        statement = [ 
+        statement = [
           {
-            effect = "Allow"
-            actions = ["s3:GetObject"]
+            effect           = "Allow"
+            actions          = ["s3:GetObject"]
             resources_prefix = ["*"]
             principals = [
               {
-                type = "AWS"
-                identifiers = [ "arn:aws:iam::770831555164:user/juan.ferreira" ]
+                type        = "AWS"
+                identifiers = ["arn:aws:iam::770831555164:user/juan.ferreira"]
               }
             ]
             notprincipals = [
               {
-                type = "AWS"
-                identifiers = [ "arn:aws:iam::770831555164:user/juan.ferreira" ]
+                type        = "AWS"
+                identifiers = ["arn:aws:iam::770831555164:user/juan.ferreira"]
               }
             ]
-          } 
+          }
         ]
-      } 
+      }
     },
   ]
 }
@@ -46,6 +46,6 @@ output "for_input" {
 }
 
 output "finalconfig" {
-value = module.opsteam-testecase-01-nobucketpolicy.finalconfig
+  value = module.opsteam-testecase-01-nobucketpolicy.finalconfig
 }
 

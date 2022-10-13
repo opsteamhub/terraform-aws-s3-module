@@ -1,14 +1,14 @@
 module "opsteam-testecase-01-versioning" {
   source = "../.././"
   bucket_config = [
-    { 
+    {
       bucket_name = "opsteam-testecase-01-versioning"
       versioning_configuration = {
         status = "Enabled"
       }
     },
-    { 
-      bucket_name = "opsteam-testecase-01-versioningdisabled" 
+    {
+      bucket_name = "opsteam-testecase-01-versioningdisabled"
     }
   ]
 }

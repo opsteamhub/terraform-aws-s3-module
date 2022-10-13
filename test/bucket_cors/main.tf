@@ -1,9 +1,9 @@
 module "opsteam-testecase-01-cors" {
   source = "../.././"
   bucket_config = [
-    { 
-      bucket_name = "opsteam-testecase-001-cors" 
-      cors_rule = [ 
+    {
+      bucket_name = "opsteam-testecase-001-cors"
+      cors_rule = [
         {
           max_age_seconds = 3000
         },
@@ -12,8 +12,8 @@ module "opsteam-testecase-01-cors" {
         }
       ]
     },
-    { 
-      bucket_name = "opsteam-testecase-001-nocors" 
+    {
+      bucket_name = "opsteam-testecase-001-nocors"
     }
   ]
 }
@@ -33,6 +33,6 @@ output "for_input" {
 }
 
 output "finalconfig" {
-value = module.opsteam-testecase-01-cors.finalconfig
+  value = module.opsteam-testecase-01-cors.finalconfig
 }
 

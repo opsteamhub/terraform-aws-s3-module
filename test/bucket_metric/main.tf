@@ -49,6 +49,6 @@ output "for_input" {
 }
 
 output "finalconfig" {
-value = module.opsteam-testecase-01-metric.finalconfig
+  value = module.opsteam-testecase-01-metric.finalconfig
 }
 

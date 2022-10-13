@@ -5,7 +5,7 @@ module "opsteam-testecase-sse-config-01" {
       bucket_name = "opsteam-testecase-sse-config-01-sses3-true"
       sse_config = {
         apply_server_side_encryption_by_default = {
-          sse_algorithm     = "AES256"
+          sse_algorithm = "AES256"
         }
       }
     },

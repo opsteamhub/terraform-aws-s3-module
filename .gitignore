@@ -2,8 +2,8 @@
 **/.terraform/*
 
 # .tfstate files
-*.tfstate
-*.tfstate.*
+**/*.tfstate
+**/*.tfstate.*
 
 # Crash log files
 crash.log
@@ -32,7 +32,7 @@ override.tf.json
 **/*.swp
 
 # other common files
-*.hcl
-*.backup
-*.out
-*.info
+**/*.hcl
+**/*.backup
+**/*.out
+**/*.info

@@ -99,24 +99,24 @@ locals {
             }
 
             // Mesma lógica aplicada em noncurrent_version_transition, veja o comentário deste
-            filter =  sum( [for item in tomap({"filter" = x["filter"]}): item!= null ? 0 : 1] )>0 ? null : {
-              and = {
-                object_size_greater_than = try(x["filter"]["and"]["object_size_greater_than"], null)
-                object_size_less_than    = try(x["filter"]["and"]["object_size_less_than"], null)
-                prefix                   = try(x["filter"]["and"]["prefix"], null)
-                tag = {
-                  key   = try(x["filter"]["and"]["tag"]["key"], null)
-                  value = try(x["filter"]["and"]["tag"]["value"], null)
-                }
-              }
+            // Se tem and
+            filter = sum([for item in tomap({ "filter" = x["filter"] }) : item != null ? 0 : 1]) > 0 ? null : {
+
               object_size_greater_than = try(x["filter"]["object_size_greater_than"], null)
               object_size_less_than    = try(x["filter"]["object_size_less_than"], null)
               prefix                   = try(x["filter"]["prefix"], null)
               // Mesma lógica aplicada em noncurrent_version_transition, veja o comentário deste
-              tag =  sum( [for item in tomap({"tag" = x["filter"]["tag"]}): item!= null ? 0 : 1] )>0 ? null : {
-                  key   = try(x["filter"]["tag"]["key"], null)
-                  value = try(x["filter"]["tag"]["value"], null)
-              }  
+              tag = sum([for item in tomap({ "tag" = x["filter"]["tag"] }) : item != null ? 0 : 1]) > 0 ? null : {
+                key   = try(x["filter"]["tag"]["key"], null)
+                value = try(x["filter"]["tag"]["value"], null)
+              }
+
+              and = {
+                object_size_greater_than = try(x["filter"]["and"]["object_size_greater_than"], null)
+                object_size_less_than    = try(x["filter"]["and"]["object_size_less_than"], null)
+                prefix                   = try(x["filter"]["and"]["prefix"], null)
+                tags                     = try(x["filter"]["and"]["tags"], null)
+              }
             }
 
             noncurrent_version_expiration = {
@@ -126,19 +126,19 @@ locals {
 
 
             # Para garantir que todos somente se houver 1 item não nulo, que esse parametro será definido Se todos forem nulos, o parametro será nulo por inteiro ("noncurrent_version_transition" = null), e não um mapa com elementos nulos dentro ("noncurrent_version_transition" = {"newer_noncurrent_versions" = null,"noncurrent_days"=null, "storage_class"=null  })
-            noncurrent_version_transition =  sum( [for item in tomap({"noncurrent_version_transition" = x["noncurrent_version_transition"]}): item!= null ? 0 : 1] )>0 ? null : {
+            noncurrent_version_transition = sum([for item in tomap({ "noncurrent_version_transition" = x["noncurrent_version_transition"] }) : item != null ? 0 : 1]) > 0 ? null : {
               newer_noncurrent_versions = try(x["noncurrent_version_transition"]["newer_noncurrent_versions"], null)
               noncurrent_days           = try(x["noncurrent_version_transition"]["noncurrent_days"], null)
               storage_class             = try(x["noncurrent_version_transition"]["storage_class"], null)
-            }  
+            }
 
 
             // Mesma lógica aplicada em noncurrent_version_transition, veja o comentário deste
-            transition =  sum( [for item in tomap({"transition" = x["transition"]}): item!= null ? 0 : 1] )>0 ? null : {
+            transition = sum([for item in tomap({ "transition" = x["transition"] }) : item != null ? 0 : 1]) > 0 ? null : {
               date          = try(x["transition"]["date"], null)
               days          = try(x["transition"]["days"], null)
               storage_class = try(x["transition"]["storage_class"], null)
-            }           
+            }
           }
         ]
       }

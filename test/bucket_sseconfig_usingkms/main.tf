@@ -12,11 +12,11 @@ module "opsteam-testecase-sse-config-kms" {
         }
       }
     },
-#    {
-#      bucket_name = "opsteam-testecase-sse-config-kms-ssekms-false"
-#      sse_config = {
-#         bucket_key_enabled = false
-#      }
-#    },
+    #    {
+    #      bucket_name = "opsteam-testecase-sse-config-kms-ssekms-false"
+    #      sse_config = {
+    #         bucket_key_enabled = false
+    #      }
+    #    },
   ]
 }

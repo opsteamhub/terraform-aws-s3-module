@@ -8,7 +8,7 @@ module "opsteam-testecase-01-acl-public" {
           grant = [
             {
               grantee = {
-                id   = "e2fdf456ca518ed2dc91e27cee7687b17b47d4aafef38abd07b5383e0ffc5e2c" 
+                id   = "e2fdf456ca518ed2dc91e27cee7687b17b47d4aafef38abd07b5383e0ffc5e2c"
                 type = "CanonicalUser"
               }
               permission = "READ"
@@ -29,8 +29,8 @@ module "opsteam-testecase-01-acl-public" {
         restrict_public_buckets = false
       }
     },
-    { 
-      bucket_name = "opsteam-testecase-003-acl-private-implicity" 
+    {
+      bucket_name = "opsteam-testecase-003-acl-private-implicity"
     }
   ]
 }
@@ -50,6 +50,6 @@ output "for_input" {
 }
 
 output "finalconfig" {
-value = module.opsteam-testecase-01-acl-public.finalconfig
+  value = module.opsteam-testecase-01-acl-public.finalconfig
 }
 

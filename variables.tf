@@ -90,39 +90,32 @@ variable "bucket_config" {
                     object(
                       {
                         and = optional(
-                          set(
-                            object(
-                              {
-                                object_size_greater_than = optional(string) # Minimum object size (in bytes) to which the rule applies.
-                                object_size_less_than    = optional(string) # Maximum object size (in bytes) to which the rule applies.
-                                prefix                   = optional(string) # Prefix identifying one or more objects to which the rule applies. Defaults to an empty string ("") if not specified.
-                                tag = optional(                             # A configuration block for specifying a tag key and value
-                                  set(
-                                    object(
-                                      {
-                                        key   = optional(string) # Name of the object key.
-                                        value = optional(string) # Value of the tag.
-                                      }
-                                    )
-                                  )
-                                )
-                              }
-                            )
+                          object(
+                            {
+                              object_size_greater_than = optional(string) # Minimum object size (in bytes) to which the rule applies.
+                              object_size_less_than    = optional(string) # Maximum object size (in bytes) to which the rule applies.
+                              prefix                   = optional(string) # Prefix identifying one or more objects to which the rule applies. Defaults to an empty string ("") if not specified.                                
+                              tags = optional(                            # Key-value map of resource tags. All of these tags must exist in the object's tag set in order for the rule to apply.
+                                map(string)
+
+                              )
+                            }
                           )
+
                         )
+
                         object_size_greater_than = optional(string) # Minimum object size (in bytes) to which the rule applies.
                         object_size_less_than    = optional(string) # Maximum object size (in bytes) to which the rule applies.
                         prefix                   = optional(string) # Prefix identifying one or more objects to which the rule applies. Defaults to an empty string ("") if not specified
                         tag = optional(                             # A configuration block for specifying a tag key and value
-                          set(
-                            object(
-                              {
-                                key   = optional(string) # Name of the object key.
-                                value = optional(string) # Value of the tag.
-                              }
-                            )
+                          object(
+                            {
+                              key   = optional(string) # Name of the object key.
+                              value = optional(string) # Value of the tag.
+                            }
                           )
                         )
+
                       }
                     )
                   )

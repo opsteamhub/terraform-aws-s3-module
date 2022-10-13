@@ -1,10 +1,10 @@
 module "opsteam-testecase-01-websiteconfig" {
   source = "../.././"
   bucket_config = [
-    { 
-      bucket_name = "opsteam-testecase-001-nowebsiteconfig" 
+    {
+      bucket_name = "opsteam-testecase-001-nowebsiteconfig"
     },
-    { 
+    {
       bucket_name = "opsteam-testecase-001-websiteconfig"
       website_config = {
         index_document = {
@@ -12,7 +12,7 @@ module "opsteam-testecase-01-websiteconfig" {
         }
       }
     },
-    { 
+    {
       bucket_name = "opsteam-testecase-002-websiteconfig"
       website_config = {
         index_document = {
@@ -23,7 +23,7 @@ module "opsteam-testecase-01-websiteconfig" {
         }
       }
     },
-    { 
+    {
       bucket_name = "opsteam-testecase-003-websiteconfig"
       website_config = {
         index_document = {
@@ -57,6 +57,6 @@ output "for_input" {
 }
 
 output "finalconfig" {
-value = module.opsteam-testecase-01-websiteconfig.finalconfig
+  value = module.opsteam-testecase-01-websiteconfig.finalconfig
 }
 
