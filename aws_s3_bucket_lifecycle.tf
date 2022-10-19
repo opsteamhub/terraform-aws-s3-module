@@ -19,6 +19,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
           days_after_initiation = rule.value["abort_incomplete_multipart_upload"]["days_after_initiation"]
         }
       }
+
       dynamic "expiration" {
         for_each = rule.value["expiration"] != null ? tomap({ "expiration" = rule.value["expiration"] }) : {}
         // for_each = toset([rule.value["expiration"]]) // Funciona, mas não é o jeito mais elegante de ser feito
@@ -31,7 +32,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
 
       dynamic "filter" {
         for_each = rule.value["filter"] != null ? tomap({ "filter" = rule.value["filter"] }) : {}
-        // for_each = toset([rule.value["expiration"]]) // Funciona, mas não é o jeito palmeirense de ser feito
+        // for_each = toset([rule.value["expiration"]]) // Funciona, mas não é o jeito elegante de ser feito
         content {
           object_size_greater_than = try(filter.value["object_size_greater_than"], null)
           object_size_less_than    = try(filter.value["object_size_less_than"], null)
@@ -77,8 +78,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
           storage_class = try(transition.value["storage_class"], null)
         }
       }
-
-
     }
   }
 }

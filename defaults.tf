@@ -135,6 +135,7 @@ locals {
 
             // Mesma lógica aplicada em noncurrent_version_transition, veja o comentário deste
             transition = sum([for item in tomap({ "transition" = x["transition"] }) : item != null ? 0 : 1]) > 0 ? null : {
+
               date          = try(x["transition"]["date"], null)
               days          = try(x["transition"]["days"], null)
               storage_class = try(x["transition"]["storage_class"], null)
@@ -142,7 +143,6 @@ locals {
           }
         ]
       }
-      # LIFECYCLE CONFIG  - TASK TERMINOU AQUI
 
       logging_config = {
         target_bucket         = try(v["logging_config"]["target_bucket"], null)
@@ -161,6 +161,79 @@ locals {
 
       metric = { for x in coalesce(v["metric"], []) :
         format("%s-%s", k, x["name"]) => merge(x, { bucket_name : k })
+      }
+
+      // verifica o tamanho do item ["bucket_config"]["replication"], se for maior que 1 (ou seja, se o usuario passo alguma coisa), será processado o conteudo. Se for igual a zero (ou seja, não tem dado nenhum), será definido que replication = null
+      replication = sum([for item in tomap({ "replication" = v["replication"] }) : item != null ? 0 : 1]) > 0 ? null : {
+
+        different_accounts = try(v["replication"]["different_accounts"], null)
+        region             = try(v["replication"]["region"], null) # Required
+        role               = try(v["replication"]["role"], null)   # Required
+        //  rule               = try(v["replication"]["rule"], null)
+
+        rule = {
+          delete_marker_replication = {
+            status = try(v["replication"]["rule"]["delete_marker_replication"]["status"], null)
+          }
+
+          destination = {
+            access_control_translation = {
+              owner = try(v["replication"]["rule"]["destination"]["access_control_translation"]["owner"], null)
+            }
+            account = try(v["replication"]["rule"]["destination"]["account"], null)
+
+            bucket = try(v["replication"]["rule"]["destination"]["bucket"], null)
+            encryption_configuration = {
+              replica_kms_key_id = try(v["replication"]["rule"]["destination"]["encryption_configuration"]["replica_kms_key_id"], null)
+            }
+            metrics = {
+              event_threshold = {
+                minutes = try(v["replication"]["rule"]["destination"]["metrics"]["event_threshold"]["minutes"], null)
+              }
+              status = try(v["replication"]["rule"]["destination"]["metrics"]["status"], null)
+            }
+            replication_time = {
+              status = try(v["replication"]["rule"]["destination"]["replication_time"]["status"], null)
+              time = {
+                minutes = try(v["replication"]["rule"]["destination"]["replication_time"]["time"], null)
+              }
+            }
+            storage_class = try(v["replication"]["rule"]["destination"]["storage_class"], null)
+          }
+
+          existing_object_replication = sum([for item in tomap({ "existing_object_replication" = v["replication"]["rule"]["existing_object_replication"] }) : item != null ? 0 : 1]) > 0 ? null : {
+            status = try(v["replication"]["rule"]["existing_object_replication"]["status"], null)
+          }
+
+          filter = {
+            prefix = try(v["replication"]["rule"]["filter"]["prefix"], null)
+            tag = sum([for item in tomap({ "tag" = v["replication"]["rule"]["filter"]["tag"] }) : item != null ? 0 : 1]) > 0 ? null : {
+              key   = try(v["replication"]["rule"]["filter"]["tag"]["key"], null)
+              value = try(v["replication"]["rule"]["filter"]["tag"]["value"], null)
+            }
+            and = {
+              prefix = try(v["replication"]["rule"]["filter"]["and"]["prefix"], null)
+              tags   = try(v["replication"]["rule"]["filter"]["and"]["tags"], null)
+            }
+          }
+          id       = try(v["replication"]["rule"]["id"], null)
+          prefix   = try(v["replication"]["rule"]["prefix"], null)
+          priority = try(v["replication"]["rule"]["priority"], null)
+
+          source_selection_criteria = try(v["replication"]["rule"]["source_selection_criteria"]["replica_modifications"]["status"], null) == null && try(v["replication"]["rule"]["source_selection_criteria"]["sse_kms_encrypted_objects"]["status"], null) == null ? null : {
+            replica_modifications = try(v["replication"]["rule"]["source_selection_criteria"]["replica_modifications"]["status"], null) == null ? null : {
+              status = v["replication"]["rule"]["source_selection_criteria"]["replica_modifications"]["status"]
+            }
+            sse_kms_encrypted_objects = try(v["replication"]["rule"]["source_selection_criteria"]["sse_kms_encrypted_objects"]["status"], null) == null ? null : {
+              status = v["replication"]["rule"]["source_selection_criteria"]["sse_kms_encrypted_objects"]["status"]
+            }
+          }
+          status = try(v["replication"]["rule"]["status"], null)
+
+        }
+
+
+        token = try(v["replication"]["token"], null) # Required
       }
 
       sse_config = {
@@ -205,13 +278,12 @@ output "bucketnames" {
 output "for_input" {
   value = zipmap(local.bucket_names, var.bucket_config)
 }
-
+/*
 output "finalconfig" {
   value = local.bucket_config
 }
-
-/*
-output "finalconfig" {
-  value = local.bucket_config["opsteam-testecase-001-lifecycle-com-lifecycle"]["lifecycle_config"]
-}
 */
+
+output "finalconfig" {
+  value = local.bucket_config["cb.replication.source"]["replication"]
+}
