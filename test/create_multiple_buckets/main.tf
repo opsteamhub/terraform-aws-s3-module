@@ -2,10 +2,10 @@ module "opsteam-testecase-01" {
   source = "../.././"
   bucket_config = [
     {
-      bucket_name = "opsteam-testecase-01-a"
+      bucket_name = "opsteam-testecase-01-a-123456"
     },
     {
-      bucket_name = "opsteam-testecase-01-b"
+      bucket_name = "opsteam-testecase-01-b-123456"
     },
   ]
 }

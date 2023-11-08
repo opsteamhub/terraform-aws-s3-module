@@ -2,7 +2,7 @@
 
 resource "aws_iam_role" "replication" {
   for_each = { for k, v in local.bucket_config :
-    k => v if v["replication"] != null && try(v["replication"]["different_accounts"],false)
+    k => v if v["replication"] != null && try(v["replication"]["different_accounts"], false)
   }
 
   name = "tf-role-replication-${each.key}"
@@ -26,7 +26,7 @@ POLICY
 
 resource "aws_iam_policy" "replication" {
   for_each = { for k, v in local.bucket_config :
-    k => v if v["replication"] != null && try(v["replication"]["different_accounts"],false)
+    k => v if v["replication"] != null && try(v["replication"]["different_accounts"], false)
   }
   name = "tf-policy-replication-${each.key}"
 
@@ -73,7 +73,7 @@ resource "aws_iam_policy" "replication" {
 resource "aws_iam_role_policy_attachment" "replication" {
   depends_on = [aws_iam_policy.replication]
   for_each = { for k, v in local.bucket_config :
-    k => v if v["replication"] != null && try(v["replication"]["different_accounts"],false)
+    k => v if v["replication"] != null && try(v["replication"]["different_accounts"], false)
   }
   role       = "tf-role-replication-${each.key}"
   policy_arn = "arn:aws:iam::${data.aws_caller_identity.current_session.account_id}:policy/tf-policy-replication-${each.key}"
@@ -82,7 +82,7 @@ resource "aws_iam_role_policy_attachment" "replication" {
 resource "aws_s3_bucket_replication_configuration" "replication" {
   depends_on = [aws_s3_bucket_versioning.versioning] #   Must have bucket versioning enabled first
   for_each = { for k, v in local.bucket_config :
-    k => v if v["replication"] != null && try(v["replication"]["different_accounts"],false)
+    k => v if v["replication"] != null && try(v["replication"]["different_accounts"], false)
   }
 
   bucket = each.key
@@ -190,9 +190,9 @@ resource "aws_s3_bucket_replication_configuration" "replication" {
 
 resource "local_file" "template" { // Create policy to attach in destination Bucket
   for_each = { for k, v in local.bucket_config :
-    k => v if v["replication"] != null && try(v["replication"]["different_accounts"],false)
+    k => v if v["replication"] != null && try(v["replication"]["different_accounts"], false)
   }
-// && try(v["replication"]["different_accounts"],false)]
+  // && try(v["replication"]["different_accounts"],false)]
 
   content = templatefile("${path.module}/templates/aws_aim_s3_bucket_policy_replication.tftpl",
     { arn_role_origin_account = "arn:aws:iam::${data.aws_caller_identity.current_session.account_id}:role/tf-role-replication-${each.key}", arn_destination_bucket = "arn:aws:s3:::${each.value["replication"]["rule"]["destination"]["bucket"]}"

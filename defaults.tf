@@ -55,7 +55,7 @@ locals {
   bucket_config = { for k, v in zipmap(local.bucket_names, var.bucket_config) :
     k => {
       acl = {
-        acl                   = try(v["acl"]["access_control_policy"], null) == null ? coalesce(try(v["acl"]["acl"], null), local.default_bucket_config["acl"]["acl"]) : null
+        acl                   = "private" # try(v["acl"]["access_control_policy"], null) == null ? coalesce(try(v["acl"]["acl"], null), local.default_bucket_config["acl"]["acl"]) : null
         access_control_policy = try(v["acl"]["access_control_policy"], null)
         expected_bucket_owner = coalesce(try(v["acl"]["expected_bucket_owner"], null), local.default_bucket_config["acl"]["expected_bucket_owner"])
       }
@@ -278,12 +278,7 @@ output "bucketnames" {
 output "for_input" {
   value = zipmap(local.bucket_names, var.bucket_config)
 }
-/*
-output "finalconfig" {
-  value = local.bucket_config
-}
-*/
 
 output "finalconfig" {
-  value = local.bucket_config["cb.replication.source"]["replication"]
+  value = local.bucket_config
 }
