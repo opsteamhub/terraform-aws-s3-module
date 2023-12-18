@@ -3,16 +3,27 @@ module "opsteam-testecase" {
   config = {
     bucket01 = {
       bucket = "opsteam-testecase-a"
-
-      # bucket_prefix = "Teste" # Não pode ser usado junto com o argumento bucket se não dá conflito
-
-      force_destroy = true
-
-      object_lock_enabled = true
-
       tags = {
         Name        = "My bucket"
         Environment = "Dev"
+      }
+
+      bucket_acl = {
+
+        # acl = "public-read"
+
+        access_control_policy = {
+          grant = {
+            grantee = {
+              id   = data.aws_canonical_user_id.current.id
+              type = "CanonicalUser"
+            }
+            permission = "READ"
+          }
+          owner = {
+            id = data.aws_canonical_user_id.current.id
+          }
+        }
       }
     },
     bucket02 = {

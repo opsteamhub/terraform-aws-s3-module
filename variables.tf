@@ -15,6 +15,48 @@ variable "config" {
 
         tags = optional(map(string)) # Map of tags to assign to the bucket. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
 
+
+        bucket_acl = optional( # Provides an S3 bucket ACL resource.
+          object(
+            {
+              acl = optional(string) # Canned ACL to apply to the bucket.
+              access_control_policy = optional(
+                object( # Configuration block that sets the ACL permissions for an object per grantee. 
+                  {
+                    grant = optional( # (Required) Set of grant configuration blocks. See below.
+                      object(
+                        {
+                          grantee = optional( # (Required) Configuration block for the person being granted permissions. See below.
+                            object(
+                              {
+                                email_address = optional(string) #  (Optional) Email address of the grantee. See Regions and Endpoints for supported AWS regions where this argument can be specified.
+                                id            = optional(string) #  (Optional) Canonical user ID of the grantee.
+                                type          = optional(string) #  (Required) Type of grantee. Valid values: CanonicalUser, AmazonCustomerByEmail, Group.
+                                uri           = optional(string) #  (Optional) URI of the grantee group.
+                              }
+                            )
+                          )
+                          permission = optional(string) # (Required) Logging permissions assigned to the grantee for the bucket.
+                        }
+                      )
+                    )
+                    owner = optional( #(Required) Configuration block of the bucket owner's display name and ID. 
+                      object(
+                        {
+                          id           = optional(string) #  (Required) ID of the owner.
+                          display_name = optional(string) # (Optional) Display name of the owner.
+                        }
+                      )
+                    )
+                  }
+                )
+              )
+
+              expected_bucket_owner = optional(string) #Account ID of the expected bucket owner.
+
+            }
+          )
+        )
       }
     )
   )
