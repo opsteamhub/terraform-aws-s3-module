@@ -51,9 +51,29 @@ variable "config" {
                   }
                 )
               )
-
               expected_bucket_owner = optional(string) #Account ID of the expected bucket owner.
+            }
+          )
+        )
 
+        bucket_cors = optional( # Provides an S3 bucket CORS configuration resource.
+          object(
+            {
+              expected_bucket_owner = optional(string) #Account ID of the expected bucket owner.
+              cors_rule = optional(                    # Set of origins and methods (cross-origin access that you want to allow). See below. You can configure up to 100 rules.
+                list(
+                  object(
+                    {
+                      allowed_headers = optional(set(string)) #  (Optional) Set of Headers that are specified in the Access-Control-Request-Headers header.
+                      allowed_methods = optional(set(string)) #  (Required) Set of HTTP methods that you allow the origin to execute. Valid values are GET, PUT, HEAD, POST, and DELETE.
+                      allowed_origins = optional(set(string)) #  (Required) Set of origins you want customers to be able to access the bucket from.
+                      expose_headers  = optional(set(string)) #  (Optional) Set of headers in the response that you want customers to be able to access from their applications (for example, from a JavaScript XMLHttpRequest object).
+                      id              = optional(string)      # (Optional) Unique identifier for the rule. The value cannot be longer than 255 characters.
+                      max_age_seconds = optional(string)      # (Optional) Time in seconds that your browser is to cache the preflight response for the specified resource.
+                    }
+                  )
+                )
+              )
             }
           )
         )
