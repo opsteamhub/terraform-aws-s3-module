@@ -77,6 +77,97 @@ variable "config" {
             }
           )
         )
+
+        bucket_lifecycle = optional( # Provides an S3 bucket CORS configuration resource.
+          object(
+            {
+              expected_bucket_owner = optional(string) #Account ID of the expected bucket owner.
+
+              rule = optional( # List of configuration blocks describing the rules managing the replication
+                list(
+                  object(
+                    {
+                      abort_incomplete_multipart_upload = optional( # (Optional) Configuration block that specifies the days since the initiation of an incomplete multipart upload that Amazon S3 will wait before permanently removing all parts of the upload. See below.
+                        object(
+                          {
+                            days_after_initiation = optional(string) # Number of days after which Amazon S3 aborts an incomplete multipart upload.
+                          }
+                        )
+                      )
+
+                      expiration = optional( # (Optional) Configuration block that specifies the expiration for the lifecycle of the object in the form of date, days and, whether the object has a delete marker. See below.
+                        object(
+                          {
+                            date                         = optional(string) #  (Optional) Date the object is to be moved or deleted. The date value must be in RFC3339 full-date format e.g. 2023-08-22.
+                            day                          = optional(string) # (Optional) Lifetime, in days, of the objects that are subject to the rule. The value must be a non-zero positive integer.
+                            expired_object_delete_marker = optional(string) # (Optional, Conflicts with date and days) Indicates whether Amazon S3 will remove a delete marker with no noncurrent versions. If set to true, the delete marker will be expired; if set to false the policy takes no action.
+                          }
+                        )
+                      )
+
+                      filter = optional( # (Optional) Configuration block used to identify objects that a Lifecycle Rule applies to. See below. If not specified, the rule will default to using prefix.
+                        object(
+                          {
+                            and                      = optional(any)         #  (Optional) Configuration block used to apply a logical AND to two or more predicates. See below. The Lifecycle Rule will apply to any object matching all the predicates configured inside the and block.
+                            object_size_greater_than = optional(string)      # (Optional) Minimum object size (in bytes) to which the rule applies.
+                            object_size_less_than    = optional(string)      # (Optional) Maximum object size (in bytes) to which the rule applies.
+                            prefix                   = optional(string)      #  (Optional) Prefix identifying one or more objects to which the rule applies. Defaults to an empty string ("") if not specified.
+                            tag                      = optional(map(string)) #  (Optional) Configuration block for specifying a tag key and value
+                          }
+                        )
+                      )
+
+                      id = optional(string) # (Required) Unique identifier for the rule. The value cannot be longer than 255 characters.
+
+                      noncurrent_version_expiration = optional( # (Optional) Configuration block that specifies when noncurrent object versions expire. See below.
+                        set(
+                          object(
+                            {
+                              newer_noncurrent_versions = optional(string) # (Optional) Number of noncurrent versions Amazon S3 will retain. Must be a non-zero positive integer.
+                              noncurrent_days           = optional(string) # (Optional) Number of days an object is noncurrent before Amazon S3 can perform the associated action. Must be a positive integer.
+                            }
+                          )
+                        )
+                      )
+
+                      noncurrent_version_transition = optional( # (Optional) Set of configuration blocks that specify the transition rule for the lifecycle rule that describes when noncurrent objects transition to a specific storage class. See below.
+                        set(
+                          object(
+                            {
+                              newer_noncurrent_versions = optional(string) # (Optional) Number of noncurrent versions Amazon S3 will retain. Must be a non-zero positive integer.
+                              noncurrent_days           = optional(string) # (Optional) Number of days an object is noncurrent before Amazon S3 can perform the associated action.
+                              storage_class             = optional(string) #(Required) Class of storage used to store the object. Valid Values: GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
+                            }
+                          )
+                        )
+                      )
+
+                      #
+                      # DEPRECATED
+                      #
+                      # prefix = optional(string) # (Optional) DEPRECATED Use filter instead. This has been deprecated by Amazon S3. Prefix identifying one or more objects to which the rule applies. Defaults to an empty string ("") if filter is not specified.
+
+                      status = optional(string) # (Required) Whether the rule is currently being applied. Valid values: Enabled or Disabled.
+
+                      transition = optional( # (Optional) Set of configuration blocks that specify when an Amazon S3 object transitions to a specified storage class. See below.
+                        set(
+                          object(
+                            {
+                              date          = optional(string) # (Optional, Conflicts with days) Date objects are transitioned to the specified storage class. The date value must be in RFC3339 full-date format e.g. 2023-08-22.
+                              days          = optional(string) # (Optional, Conflicts with date) Number of days after creation when objects are transitioned to the specified storage class. The value must be a positive integer. If both days and date are not specified, defaults to 0. Valid values depend on storage_class, see Transition objects using Amazon S3 Lifecycle for more details.
+                              storage_class = optional(string) # Class of storage used to store the object. Valid Values: GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
+                            }
+                          )
+                        )
+                      )
+                    }
+                  )
+                )
+              )
+            }
+          )
+        )
+
       }
     )
   )
