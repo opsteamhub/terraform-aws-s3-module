@@ -1,0 +1,25 @@
+### Variavel 
+xxx = optional( # xxx
+  set(
+    object(
+      {
+        yyy = optional(string) # yyy.
+        zzz = optional(string) # zzz.
+      }
+    )
+  )
+)
+
+### Bloco dinamico no resource
+  dynamic "nivel1" {
+    for_each = each.value.emelemento_variavel.nivel1 != null ? each.value.emelemento_variavel.nivel1 : []
+    content {
+      dynamic "nivel2" {
+        for_each = nivel1.value.nivel2 != null ? nivel1.value.nivel2 : []
+        content {
+          xxx = try(nivel2.value.xxx, null)
+        }
+      }
+      yyy = try(nivel1.value.yyy, null)
+    }
+  }

@@ -15,7 +15,6 @@ variable "config" {
 
         tags = optional(map(string)) # Map of tags to assign to the bucket. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
 
-
         bucket_acl = optional( # Provides an S3 bucket ACL resource.
           object(
             {
@@ -168,6 +167,61 @@ variable "config" {
           )
         )
 
+        bucket_logging = optional( # Provides an S3 bucket (server access) logging resource. For more information, see Logging requests using server access logging in the AWS S3 User Guide.
+          object(
+            {
+              expected_bucket_owner = optional(string) # (Optional, Forces new resource) Account ID of the expected bucket owner.
+
+              target_bucket = optional(string) # (Required) Name of the bucket where you want Amazon S3 to store server access logs.
+
+              target_prefix = optional(string) # (Required) Prefix for all log object keys.
+
+              target_grant = optional( # (Optional) Set of configuration blocks with information for granting permissions.
+                set(
+                  object(
+                    {
+                      grantee = optional( #  (Required) Configuration block for the person being granted permissions.
+                        set(
+                          object(
+                            {
+                              email_address = optional(string) # (Optional) Email address of the grantee. See Regions and Endpoints for supported AWS regions where this argument can be specified.
+                              id            = optional(string) # (Optional) Canonical user ID of the grantee.
+                              type          = optional(string) # (Required) Type of grantee. Valid values: CanonicalUser, AmazonCustomerByEmail, Group.
+                              uri           = optional(string) # (Optional) URI of the grantee group.
+
+                            }
+                          )
+                        )
+                      )
+
+                      permission = optional(string) # (Required) Logging permissions assigned to the grantee for the bucket. Valid values: FULL_CONTROL, READ, WRITE.
+                    }
+                  )
+                )
+              )
+
+              target_object_key_format = optional( # (Optional) Amazon S3 key format for log objects. See below.
+                set(
+                  object(
+                    {
+                      partitioned_prefix = optional( # (Optional) Partitioned S3 key for log objects. See below.
+                        set(
+                          object(
+                            {
+                              partition_date_source = optional(string) # (Required) Specifies the partition date source for the partitioned prefix. Valid values: EventTime, DeliveryTime.
+                            }
+                          )
+                        )
+                      )
+                      simple_prefix = optional(bool) # (Optional) Use the simple format for S3 keys for log objects. To use, set simple_prefix = true
+                    }
+                  )
+                )
+              )
+            }
+          )
+        )
+        
       }
     )
   )
