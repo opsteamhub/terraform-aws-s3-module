@@ -221,7 +221,25 @@ variable "config" {
             }
           )
         )
-        
+
+        bucket_metric = optional( # Provides a S3 bucket metrics configuration resource
+          object(
+            {
+              name = optional(string) #  (Required) Unique identifier of the metrics configuration for the bucket. Must be less than or equal to 64 characters in length.
+
+              filter = optional( # (Optional) Object filtering that accepts a prefix, tags, or a logical AND of prefix and tags (documented below).
+                set(
+                  object(
+                    {
+                      prefix = optional(string)      # (Optional) Object prefix for filtering (singular).
+                      tags   = optional(map(string)) # (Optional) Object tags for filtering (up to 10).
+                    }
+                  )
+                )
+              )
+            }
+          )
+        )
       }
     )
   )
