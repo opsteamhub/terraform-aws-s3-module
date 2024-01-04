@@ -18,14 +18,11 @@ module "opsteam-testecase" {
             }
           }
         ]
-
-
       }
     },
     bucket02 = {
       bucket        = "opsteam-testecase-b"
       create_bucket = false
-
     },
   }
 }
