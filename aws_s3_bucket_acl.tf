@@ -16,21 +16,6 @@ resource "aws_s3_bucket_ownership_controls" "bucket_ownership_control" {
 }
 
 
-resource "aws_s3_bucket_public_access_block" "bucket_public_access_block" {
-  for_each = {
-    for key, value in var.config : key => value
-    if value.bucket_acl != null
-  }
-
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
-
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-
-}
-
 resource "aws_s3_bucket_acl" "bucket_acl" {
   depends_on = [aws_s3_bucket.bucket, data.aws_s3_bucket.bucket]
 
