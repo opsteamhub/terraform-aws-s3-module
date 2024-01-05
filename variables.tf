@@ -316,7 +316,25 @@ variable "config" {
           )
         )
 
+        versioning = optional( # Provides a resource for controlling versioning on an S3 bucket. Deleting this resource will either suspend versioning on the associated S3 bucket or simply remove the resource from Terraform state if the associated S3 bucket is unversioned.
+          object(
+            {
+              versioning_configuration = optional( # (Required) Configuration block for the versioning parameters. See below.
+                object(
+                  {
+                    status     = optional(string) #  (Required) Versioning state of the bucket. Valid values: Enabled, Suspended, or Disabled. Disabled should only be used when creating or importing resources that correspond to unversioned S3 buckets.
+                    mfa_delete = optional(string) #  (Optional) Specifies whether MFA delete is enabled in the bucket versioning configuration. Valid values: Enabled or Disabled.
+                  }
+                )
+              )
 
+              expected_bucket_owner = optional(string) # (Optional, Forces new resource) Account ID of the expected bucket owner.
+
+              mfa = optional(string) # (Optional, Required if versioning_configuration mfa_delete is enabled) Concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device.
+            }
+          )
+
+        )
       }
     )
   )

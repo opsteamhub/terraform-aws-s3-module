@@ -26,6 +26,3 @@ module "opsteam-testecase" {
     },
   }
 }
-
-
-
