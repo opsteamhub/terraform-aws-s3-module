@@ -1,3 +1,9 @@
+variable "region" {
+  type        = string
+  description = "Region to deploy S3 bucket"
+  default     = "us-east-1"
+}
+
 variable "config" {
   description = "Define attributes to manage S3 buckets"
   type = map(
@@ -241,7 +247,6 @@ variable "config" {
           )
         )
 
-
         bucket_policy = optional( # Attaches a policy to an S3 bucket resource.
           object(
             {
@@ -335,6 +340,196 @@ variable "config" {
           )
 
         )
+
+        replication = optional( # Provides an independent configuration resource for S3 bucket replication configuration.
+          object(
+            {
+
+              direction = optional(string) # If Bi-Directional Replication
+
+              different_accounts = optional(bool) # If true, set replication within different accounts
+
+              destination = optional(string) # (Required) Name of the S3 bucket you want deposit your replication.
+
+              role = optional(string) #  (Required) ARN of the IAM role for Amazon S3 to assume when replicating the objects.
+
+              rule = optional( # (Required) List of configuration blocks describing the rules managing the replication. See below.
+                object(
+                  {
+                    delete_marker_replication = optional( # (Optional) Whether delete markers are replicated. This argument is only valid with V2 replication configurations (i.e., when filter is used)documented below.
+                      object(
+                        {
+                          status = optional(string) # (Required) Whether delete markers should be replicated. Either "Enabled" or "Disabled".
+                        }
+                      )
+                    )
+
+                    destination = optional( #  (Required) Specifies the destination for the rule. See below.
+                      object(
+                        {
+                          access_control_translation = optional( #  (Optional) Configuration block that specifies the overrides to use for object owners on replication. See below. Specify this only in a cross-account scenario (where source and destination bucket owners are not the same), and you want to change replica ownership to the AWS account that owns the destination bucket. If this is not specified in the replication configuration, the replicas are owned by same AWS account that owns the source object. Must be used in conjunction with account owner override configuration.
+                            object(
+                              {
+                                owner = optional(string) # (Required) Specifies the replica ownership. For default and valid values, see PUT bucket replication in the Amazon S3 API Reference. Valid values: Destination.
+                              }
+                            )
+                          )
+
+                          account = optional(string) #  (Optional) Account ID to specify the replica ownership. Must be used in conjunction with access_control_translation override configuration.
+
+                          bucket = optional(string) #  (Required) ARN of the bucket where you want Amazon S3 to store the results.
+
+                          encryption_configuration = optional( #  (Optional) Configuration block that provides information about encryption. See below. If source_selection_criteria is specified, you must specify this element.
+                            object(
+                              {
+                                replica_kms_key_id = optional(string) #  (Required) ID (Key ARN or Alias ARN) of the customer managed AWS KMS key stored in AWS Key Management Service (KMS) for the destination bucket.
+
+                              }
+                            )
+                          )
+
+                          metrics = optional( #  (Optional) Configuration block that specifies replication metrics-related settings enabling replication metrics and events. See below.
+                            object(
+                              {
+                                event_threshold = optional( #  (Optional) Configuration block that specifies the time threshold for emitting the s3:Replication:OperationMissedThreshold event. See below.
+                                  object(
+                                    {
+                                      minutes = optional(string) # (Required) Time in minutes. Valid values: 15.
+                                    }
+                                  )
+                                )
+                                status = optional(string) #  (Required) Status of the Destination Metrics. Either "Enabled" or "Disabled".
+
+                              }
+                            )
+                          )
+
+                          replication_time = optional( #  (Optional) Configuration block that specifies S3 Replication Time Control (S3 RTC), including whether S3 RTC is enabled and the time when all objects and operations on objects must be replicated. See below. Replication Time Control must be used in conjunction with metrics.
+                            object(
+                              {
+                                status = optional(string) # (Required) Status of the Replication Time Control. Either "Enabled" or "Disabled".
+
+                                time = optional( # (Required) Configuration block specifying the time by which replication should be complete for all objects and operations on objects.
+                                  object(
+                                    {
+                                      minutes = optional(string) # (Required) Time in minutes. Valid values: 15.
+                                    }
+                                  )
+                                )
+                              }
+                            )
+                          )
+
+                          storage_class = optional(string) #  (Optional) The storage class used to store the object. By default, Amazon S3 uses the storage class of the source object to create the object replica.
+
+                        }
+                      )
+                    )
+
+                    existing_object_replication = optional( #  (Optional) Replicate existing objects in the source bucket according to the rule configurations. See below.
+                      object(
+                        {
+                          status = optional(string) # (Required) Whether the existing objects should be replicated. Either "Enabled" or "Disabled".
+                        }
+                      )
+                    )
+
+                    filter = optional( #  (Optional, Conflicts with prefix) Filter that identifies subset of objects to which the replication rule applies. See below. If not specified, the rule will default to using prefix.
+                      object(
+                        {
+                          and = optional( #  (Optional) Configuration block for specifying rule filters. This element is required only if you specify more than one filter. See and below for more details.
+                            object(
+                              {
+                                prefix = optional(string) #  (Optional) Object key name prefix that identifies subset of objects to which the rule applies. Must be less than or equal to 1024 characters in length.
+
+                                tags = optional( #  (Optional, Required if prefix is configured) Map of tags (key and value pairs) that identifies a subset of objects to which the rule applies. The rule applies only to objects having all the tags in its tagset.
+                                  object(
+                                    {
+                                      key = optional(string) #  (Required) Name of the object key.
+
+                                      value = optional(string) #  (Required) Value of the tag.
+                                    }
+                                  )
+                                )
+                              }
+                            )
+                          )
+
+                          prefix = optional(string) #  (Optional) Object key name prefix that identifies subset of objects to which the rule applies. Must be less than or equal to 1024 characters in length.
+
+                          tag = optional(string) # (Optional) Configuration block for specifying a tag key and value.
+                        }
+                      )
+                    )
+
+                    id = optional(string) # (Optional) Unique identifier for the rule. Must be less than or equal to 255 characters in length.
+
+                    prefix = optional(string) #  (Optional, Conflicts with filter, Deprecated) Object key name prefix identifying one or more objects to which the rule applies. Must be less than or equal to 1024 characters in length. Defaults to an empty string ("") if filter is not specified.
+
+                    priority = optional(string) #  (Optional) Priority associated with the rule. Priority should only be set if filter is configured. If not provided, defaults to 0. Priority must be unique between multiple rules.
+
+                    source_selection_criteria = optional( #  (Optional) Specifies special object selection criteria. 
+                      object(
+                        {
+                          replica_modifications = optional( # (Optional) Configuration block that you can specify for selections for modifications on replicas. Amazon S3 doesn't replicate replica modifications by default. In the latest version of replication configuration (when filter is specified), you can specify this element and set the status to Enabled to replicate modifications on replicas.
+                            object(
+                              {
+
+                                status = optional(string) # (Required) Whether the existing objects should be replicated. Either "Enabled" or "Disabled".
+                              }
+                            )
+                          )
+
+                          sse_kms_encrypted_objects = optional( # (Optional) Configuration block for filter information for the selection of Amazon S3 objects encrypted with AWS KMS. If specified, replica_kms_key_id in destination encryption_configuration must be specified as well.
+                            object(
+                              {
+                                status = optional(string) # (Required) Whether the existing objects should be replicated. Either "Enabled" or "Disabled".
+                              }
+                            )
+                          )
+                        }
+                      )
+                    )
+
+                    status = optional(string) #  (Required) Status of the rule. Either "Enabled" or "Disabled". The rule is ignored if status is not "Enabled".
+                  }
+                )
+              )
+
+              token = optional(string) #  (Optional) Token to allow replication to be enabled on an Object Lock-enabled bucket. You must contact AWS support for the bucket's "Object Lock token". For more details, see Using S3 Object Lock with replication.
+
+            }
+          )
+        )
+
+        sse_config = optional( # Provides a S3 bucket server-side encryption configuration resource.
+          object(
+            {
+              expected_bucket_owner = optional(string) # (Optional, Forces new resource) Account ID of the expected bucket owner.
+              rule = optional(                         # Set of server-side encryption configuration rules. See below. Currently, only a single rule is supported.
+                object(
+                  {
+                    apply_server_side_encryption_by_default = optional( # (Optional) Single object for setting server-side encryption by default. See below.
+                      object(
+                        {
+                          sse_algorithm     = optional(string) #  (Required) Server-side encryption algorithm to use. Valid values are AES256, aws:kms, and aws:kms:dsse
+                          kms_master_key_id = optional(string) # (Optional) AWS KMS master key ID used for the SSE-KMS encryption. This can only be used when you set the value of sse_algorithm as aws:kms. The default aws/s3 AWS KMS master key is used if this element is absent while the sse_algorithm is aws:kms.
+                        }
+                      )
+                    )
+
+                    bucket_key_enabled = optional(string) # (Optional) Whether or not to use Amazon S3 Bucket Keys for SSE-KMS.
+
+                  }
+                )
+              )
+
+
+            }
+
+          )
+        )
+
       }
     )
   )

@@ -17,7 +17,7 @@ provider "aws" {
       "opsteam:client_id" = "CL001"
       environment         = "Dev"
       owner               = "TFProviders"
-      project             = "ASG"
+      project             = "S3"
     }
   }
 }
