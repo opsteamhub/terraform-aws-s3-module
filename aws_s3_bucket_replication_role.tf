@@ -1,9 +1,11 @@
+# Thess resources are responsible for creating the necessary IAM policy and role in the source AWS account
+# for S3 bucket replication. 
 resource "aws_iam_policy" "replication" {
   depends_on = [aws_s3_bucket.bucket, data.aws_s3_bucket.bucket]
 
   for_each = {
     for key, value in var.config : key => value
-    if try(value.replication != null && value.replication.is_source == true, false)
+    if try(value.replication != null && value.replication.rule != null, false)
   }
 
   name = "tf-policy-replication-${each.value.bucket}"
@@ -53,7 +55,7 @@ resource "aws_iam_role" "replication" {
 
   for_each = {
     for key, value in var.config : key => value
-    if try(value.replication != null && value.replication.is_source == true, false)
+    if try(value.replication != null && value.replication.rule != null, false)
   }
 
   name = "tf-role-replication-${each.value.bucket}"
@@ -82,4 +84,3 @@ resource "aws_iam_role_policy_attachment" "replication" {
   role       = each.value.name
   policy_arn = aws_iam_policy.replication[each.key].arn
 }
-

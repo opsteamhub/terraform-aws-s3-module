@@ -3,7 +3,7 @@ resource "aws_s3_bucket_replication_configuration" "replication" {
 
   for_each = {
     for key, value in var.config : key => value
-    if try(value.replication != null && value.replication.different_accounts != true, false)
+    if try(value.replication != null && value.replication.rule != null, false)
   }
 
   bucket = each.value.bucket
@@ -16,8 +16,9 @@ resource "aws_s3_bucket_replication_configuration" "replication" {
     }
 
     destination {
+
       dynamic "access_control_translation" {
-        for_each = try(each.value.replication.rule.destination.access_control_translation, null) != null ? each.value.replication.rule.destination.access_control_translation : {}
+        for_each = try(each.value.replication.rule.destination.access_control_translation, null) != null ? tomap({ "access_control_translation" = each.value.replication.rule.destination.access_control_translation }) : {}
         content {
           owner = try(access_control_translation.value.owner, null)
         }
@@ -26,7 +27,6 @@ resource "aws_s3_bucket_replication_configuration" "replication" {
       account = try(each.value.replication.rule.destination.account, null)
 
       bucket = "arn:aws:s3:::${each.value.replication.rule.destination.bucket}"
-
 
       dynamic "encryption_configuration" {
         for_each = try(each.value.replication.rule.destination.encryption_configuration.replica_kms_key_id, null) != null ? each.value.replication.rule.destination.encryption_configuration : {}

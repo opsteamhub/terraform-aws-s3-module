@@ -344,12 +344,15 @@ variable "config" {
         replication = optional( # Provides an independent configuration resource for S3 bucket replication configuration.
           object(
             {
-
-              is_source = optional(bool, true) # If true (default) the current bucket is assumed as source
+              external_account_info = optional( # OpsTeam specieal object used to provide configuration on destination buckets for different accounts
+                object(
+                  {
+                    role_arn = optional(string) # origin role arn used to replicate objects
+                  }
+                )
+              )
 
               direction = optional(string) # If Bi-Directional Replication
-
-              different_accounts = optional(bool, false) # If true, set replication within different accounts
 
               destination = optional(string) # (Required) Name of the S3 bucket you want deposit your replication.
 

@@ -1,6 +1,7 @@
 terraform {
   required_version = ">=1.4.5"
 
+  # SPOKE CLAW DEVELOPMENT
   backend "s3" {
     bucket = "opsteam-terraform-modules-tfstate-dev"
     key    = "terraform/OpsTeamModules/s3.tfstate"

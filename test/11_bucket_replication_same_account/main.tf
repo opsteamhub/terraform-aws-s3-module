@@ -1,5 +1,3 @@
-
-
 module "opsteam-replication-source" {
   source = "../.././"
 
@@ -9,9 +7,8 @@ module "opsteam-replication-source" {
     bucket01 = {
       bucket        = "opsteam-s3-module-source-bucket-849430204253"
       create_bucket = false
-      is_source     = true
       replication = {
-        rule = {
+        rule = { # Só tem rule quem é source bucket
           destination = {
             bucket = "opsteam-s3-module-destination-bucket-849430204253"
           }
@@ -24,10 +21,10 @@ module "opsteam-replication-source" {
           }
           status = "Enabled"
         }
-        different_accounts = false
+
       }
 
-      versioning = { #   Must have bucket versioning enabled 
+      versioning = { # Bucket de origem e destino precisam ter versionamento ativado 
         versioning_configuration = {
           status = "Enabled"
         }
@@ -44,7 +41,7 @@ module "opsteam-replication-destiantion" {
     bucket01 = {
       bucket        = "opsteam-s3-module-destination-bucket-849430204253"
       create_bucket = false
-      versioning = {
+      versioning = { # Bucket de origem e destino precisam ter versionamento ativado 
         versioning_configuration = {
           status = "Enabled"
         }

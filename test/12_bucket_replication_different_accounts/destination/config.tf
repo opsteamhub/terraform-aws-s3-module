@@ -1,8 +1,8 @@
 terraform {
   required_version = ">=1.4.5"
-
+  # HUB CLAW MASTER ORG
   backend "s3" {
-    bucket = "opsteam-terraform-modules-tfstate-dev"
+    bucket = "opsteam-terraform-modules-tfstate-hub.claw.master"
     key    = "terraform/OpsTeamModules/s3.tfstate"
     region = "us-east-1"
   }
