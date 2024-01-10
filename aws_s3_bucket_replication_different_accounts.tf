@@ -1,16 +1,4 @@
 
-# resource "aws_iam_role_policy_attachment" "replication" {
-#   depends_on = [aws_iam_policy.replication]
-
-#   for_each = {
-#     for key, value in var.config : key => value
-#     if try(value.replication != null && value.replication.different_accounts == true, false)
-#   }
-
-#   role       = "tf-role-replication-${each.value.bucket}"
-#   policy_arn = "arn:aws:iam::${data.aws_caller_identity.current_session.account_id}:policy/tf-policy-replication-${each.value.bucket}"
-# }
-
 # resource "aws_s3_bucket_replication_configuration" "replication" {
 #   depends_on = [aws_s3_bucket_versioning.versioning] #   Must have bucket versioning enabled first
 

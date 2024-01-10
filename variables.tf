@@ -345,9 +345,11 @@ variable "config" {
           object(
             {
 
+              is_source = optional(bool, true) # If true (default) the current bucket is assumed as source
+
               direction = optional(string) # If Bi-Directional Replication
 
-              different_accounts = optional(bool) # If true, set replication within different accounts
+              different_accounts = optional(bool, false) # If true, set replication within different accounts
 
               destination = optional(string) # (Required) Name of the S3 bucket you want deposit your replication.
 
@@ -460,7 +462,7 @@ variable "config" {
                           tag = optional(string) # (Optional) Configuration block for specifying a tag key and value.
                         }
                       )
-                    )
+                    , null)
 
                     id = optional(string) # (Optional) Unique identifier for the rule. Must be less than or equal to 255 characters in length.
 
@@ -506,7 +508,8 @@ variable "config" {
           object(
             {
               expected_bucket_owner = optional(string) # (Optional, Forces new resource) Account ID of the expected bucket owner.
-              rule = optional(                         # Set of server-side encryption configuration rules. See below. Currently, only a single rule is supported.
+
+              rule = optional( # Set of server-side encryption configuration rules. See below. Currently, only a single rule is supported.
                 object(
                   {
                     apply_server_side_encryption_by_default = optional( # (Optional) Single object for setting server-side encryption by default. See below.
@@ -523,7 +526,6 @@ variable "config" {
                   }
                 )
               )
-
 
             }
 
