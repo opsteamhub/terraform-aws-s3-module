@@ -6,7 +6,8 @@ resource "aws_s3_bucket_website_configuration" "website_config" {
     if value.website_config != null
   }
 
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   dynamic "error_document" {
     for_each = each.value.website_config.error_document != null ? tomap({ "error_document" = each.value.website_config.error_document }) : {}

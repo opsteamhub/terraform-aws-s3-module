@@ -7,7 +7,8 @@ resource "aws_s3_bucket_ownership_controls" "bucket_ownership_control" {
     if value.bucket_acl != null
   }
 
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   rule {
     object_ownership = "BucketOwnerPreferred"
@@ -24,7 +25,8 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
     if value.bucket_acl != null
   }
 
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   acl = try(each.value.bucket_acl.acl, null)
 

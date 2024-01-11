@@ -7,7 +7,8 @@ resource "aws_s3_bucket_versioning" "versioning" {
     if value.versioning != null
   }
 
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   versioning_configuration {
     status     = try(each.value.versioning.versioning_configuration.status, null)

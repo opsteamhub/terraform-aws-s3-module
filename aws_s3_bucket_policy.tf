@@ -62,7 +62,8 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
     if value.bucket_policy != null
   }
 
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   policy = data.aws_iam_policy_document.bucket_policy[each.key].json
 

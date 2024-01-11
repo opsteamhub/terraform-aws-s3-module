@@ -7,7 +7,8 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block" {
     if value.public_access_block != null
   }
 
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   block_public_acls = try(each.value.public_access_block.block_public_acls, null)
 

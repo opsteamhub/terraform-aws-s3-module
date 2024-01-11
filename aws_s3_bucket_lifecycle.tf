@@ -6,7 +6,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle_configuration
     if value.bucket_lifecycle != null
   }
 
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   expected_bucket_owner = try(each.value.bucket_lifecycle.expected_bucket_owner, null)
   dynamic "rule" {

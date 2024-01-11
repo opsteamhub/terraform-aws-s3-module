@@ -6,7 +6,8 @@ resource "aws_s3_bucket_metric" "metric" {
     if value.bucket_metric != null
   }
 
-  bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   name = try(each.value.bucket_metric.name, null)
 

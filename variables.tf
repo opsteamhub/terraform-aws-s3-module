@@ -307,6 +307,23 @@ variable "config" {
           )
         )
 
+        ownership_controls = optional(
+          object(
+            {
+              rule = optional( # (Required) Configuration block(s) with Ownership Controls rules. Detailed below.
+                object(
+                  {
+                    object_ownership = optional(string) # (Required) Object ownership. Valid values: BucketOwnerPreferred, ObjectWriter or BucketOwnerEnforced
+                    # BucketOwnerPreferred - Objects uploaded to the bucket change ownership to the bucket owner if the objects are uploaded with the bucket-owner-full-control canned ACL.
+                    # ObjectWriter - Uploading account will own the object if the object is uploaded with the bucket-owner-full-control canned ACL.
+                    # BucketOwnerEnforced - Bucket owner automatically owns and has full control over every object in the bucket. ACLs no longer affect permissions to data in the S3 bucket.
+                  }
+                )
+              )
+            }
+          )
+        )
+
         public_access_block = optional( # Manages S3 bucket-level Public Access Block configuration
           object(
             {
@@ -319,26 +336,6 @@ variable "config" {
               restrict_public_buckets = optional(bool) #  (Optional) Whether Amazon S3 should restrict public bucket policies for this bucket. Defaults to false. Enabling this setting does not affect the previously stored bucket policy, except that public and cross-account access within the public bucket policy, including non-public delegation to specific accounts, is blocked. When set to true: Only the bucket owner and AWS Services can access this buckets if it has a public policy.
             }
           )
-        )
-
-        versioning = optional( # Provides a resource for controlling versioning on an S3 bucket. Deleting this resource will either suspend versioning on the associated S3 bucket or simply remove the resource from Terraform state if the associated S3 bucket is unversioned.
-          object(
-            {
-              versioning_configuration = optional( # (Required) Configuration block for the versioning parameters. See below.
-                object(
-                  {
-                    status     = optional(string) #  (Required) Versioning state of the bucket. Valid values: Enabled, Suspended, or Disabled. Disabled should only be used when creating or importing resources that correspond to unversioned S3 buckets.
-                    mfa_delete = optional(string) #  (Optional) Specifies whether MFA delete is enabled in the bucket versioning configuration. Valid values: Enabled or Disabled.
-                  }
-                )
-              )
-
-              expected_bucket_owner = optional(string) # (Optional, Forces new resource) Account ID of the expected bucket owner.
-
-              mfa = optional(string) # (Optional, Required if versioning_configuration mfa_delete is enabled) Concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device.
-            }
-          )
-
         )
 
         replication = optional( # Provides an independent configuration resource for S3 bucket replication configuration.
@@ -529,10 +526,28 @@ variable "config" {
                   }
                 )
               )
-
             }
-
           )
+        )
+
+        versioning = optional( # Provides a resource for controlling versioning on an S3 bucket. Deleting this resource will either suspend versioning on the associated S3 bucket or simply remove the resource from Terraform state if the associated S3 bucket is unversioned.
+          object(
+            {
+              versioning_configuration = optional( # (Required) Configuration block for the versioning parameters. See below.
+                object(
+                  {
+                    status     = optional(string) #  (Required) Versioning state of the bucket. Valid values: Enabled, Suspended, or Disabled. Disabled should only be used when creating or importing resources that correspond to unversioned S3 buckets.
+                    mfa_delete = optional(string) #  (Optional) Specifies whether MFA delete is enabled in the bucket versioning configuration. Valid values: Enabled or Disabled.
+                  }
+                )
+              )
+
+              expected_bucket_owner = optional(string) # (Optional, Forces new resource) Account ID of the expected bucket owner.
+
+              mfa = optional(string) # (Optional, Required if versioning_configuration mfa_delete is enabled) Concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device.
+            }
+          )
+
         )
 
         website_config = optional( #
@@ -591,6 +606,7 @@ variable "config" {
             }
           )
         )
+
       }
     )
   )
