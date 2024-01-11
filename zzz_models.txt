@@ -10,16 +10,54 @@ xxx = optional( # xxx
   )
 )
 
-### Bloco dinamico no resource
-  dynamic "nivel1" {
-    for_each = each.value.emelemento_variavel.nivel1 != null ? each.value.emelemento_variavel.nivel1 : []
-    content {
-      dynamic "nivel2" {
-        for_each = nivel1.value.nivel2 != null ? nivel1.value.nivel2 : []
-        content {
-          xxx = try(nivel2.value.xxx, null)
-        }
+
+# Bloco dinâmico no resource para um objeto
+# Este bloco dinâmico 'nivel1' é empregado para gerar configurações com base em um objeto.
+# Ao contrário do bloco para um array, aqui ele trata 'ELEMENTO_DA_VARIAVEL_CONFIG.nivel1' como um mapa (objeto),
+# convertendo-o para um mapa se não for nulo. Se 'ELEMENTO_DA_VARIAVEL_CONFIG.nivel1' for nulo, 
+# ele utiliza um mapa vazio, garantindo que a estrutura de dados seja mantida e que o recurso seja configurado corretamente,
+# mesmo quando a entrada é opcional ou variável.
+
+dynamic "nivel1" {
+  for_each = each.value.ELEMENTO_DA_VARIAVEL_CONFIG.nivel1 != null ? tomap({ "nivel1" = each.value.ELEMENTO_DA_VARIAVEL_CONFIG.nivel1 }) : {}
+  content {
+    dynamic "nivel2" {
+      for_each = nivel1.value.nivel2 != null ? nivel1.value.nivel2 : []
+      content {
+        xxx = try(nivel2.value.xxx, null)
       }
-      yyy = try(nivel1.value.yyy, null)
     }
+    yyy = try(nivel1.value.yyy, null)
   }
+}
+
+
+
+# Bloco dinâmico no resource para um array
+# Este bloco dinâmico 'nivel1' é utilizado para criar múltiplas instâncias de configuração com base em um array.
+# Ele itera sobre cada elemento do array 'ELEMENTO_DA_VARIAVEL_CONFIG.nivel1' fornecido como input.
+# Caso 'ELEMENTO_DA_VARIAVEL_CONFIG.nivel1' seja nulo, ele se comporta como se estivesse iterando sobre um array vazio, 
+# evitando erros e permitindo flexibilidade na configuração de recursos com variáveis opcionais.
+
+dynamic "nivel1" {
+  for_each = each.value.ELEMENTO_DA_VARIAVEL_CONFIG.nivel1 != null ? each.value.ELEMENTO_DA_VARIAVEL_CONFIG.nivel1 : []
+  content {
+    dynamic "nivel2" {
+      for_each = nivel1.value.nivel2 != null ? nivel1.value.nivel2 : []
+      content {
+        xxx = try(nivel2.value.xxx, null)
+      }
+    }
+    yyy = try(nivel1.value.yyy, null)
+  }
+}
+
+
+## ERRO DE DESENVOLVIMENTO
+
+module..... is required, but it has been removed. This occurs when a provider configuration is removed while objects created by that provider
+
+Erro relacionado à configuração dos provedores no seu projeto Terraform.
+Quando o Terraform diz que "a configuração do provedor não está presente", isso geralmente significa que um provedor necessário para gerenciar um recurso (neste caso, um bucket do S3, module.....) não está mais definido no seu projeto Terraform ou foi modificado de uma maneira que o torna incompatível com o estado atual.
+
+documentação sobre como lidar com erros no state file https://opsteamhub.atlassian.net/wiki/x/AYDiDg

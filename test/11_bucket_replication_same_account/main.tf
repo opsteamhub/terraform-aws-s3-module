@@ -5,8 +5,8 @@ module "opsteam-replication-source" {
 
   config = {
     bucket01 = {
-      bucket        = "opsteam-s3-module-source-bucket-849430204253"
-      create_bucket = false
+      bucket = "opsteam-s3-module-source-bucket-849430204253"
+      # create_bucket = false # Use false If the bucket already exists
       replication = {
         rule = { # Só tem rule quem é source bucket
           destination = {
@@ -39,8 +39,8 @@ module "opsteam-replication-destiantion" {
   region = "us-east-2"
   config = {
     bucket01 = {
-      bucket        = "opsteam-s3-module-destination-bucket-849430204253"
-      create_bucket = false
+      bucket = "opsteam-s3-module-destination-bucket-849430204253"
+      # create_bucket = false # Use false If the bucket already exists
       versioning = { # Bucket de origem e destino precisam ter versionamento ativado 
         versioning_configuration = {
           status = "Enabled"

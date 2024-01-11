@@ -535,6 +535,62 @@ variable "config" {
           )
         )
 
+        website_config = optional( #
+          object(
+            {
+              error_document = optional( # (Optional, Conflicts with redirect_all_requests_to) The name of the error document for the website detailed below.
+                object(
+                  {
+                    key = optional(string) #  (Required) The object key name to use when a 4XX class error occurs.
+                  }
+                )
+              )
+              expected_bucket_owner = optional(string) # (Optional, Forces new resource) The account ID of the expected bucket owner.
+              index_document = optional(               # (Optional, Required if redirect_all_requests_to is not specified) The name of the index document for the website detailed below.
+                object(
+                  {
+                    suffix = optional(string) # (Required) A suffix that is appended to a request that is for a directory on the website endpoint. For example, if the suffix is index.html and you make a request to samplebucket/images/, the data that is returned will be for the object with the key name images/index.html. The suffix must not be empty and must not include a slash character
+                  }
+                )
+              )
+
+              redirect_all_requests_to = optional( # (Optional, Required if index_document is not specified) The redirect behavior for every request to this bucket's website endpoint detailed below. Conflicts with error_document, index_document, and routing_rule.
+                object(
+                  {
+                    host_name = optional(string) # (Required) Name of the host where requests are redirected.
+                    protocol  = optional(string) # (Optional) Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: http, https.
+                  }
+                )
+              )
+
+              routing_rule = optional( # (Optional, Conflicts with redirect_all_requests_to) List of rules that define when a redirect is applied and the redirect behavior detailed below.
+                object(
+                  {
+                    condition = optional( # (Optional) A configuration block for describing a condition that must be met for the specified redirect to apply detailed below.
+                      object(
+                        {
+                          http_error_code_returned_equals = optional(string) #  (Optional, Required if key_prefix_equals is not specified) The HTTP error code when the redirect is applied. If specified with key_prefix_equals, then both must be true for the redirect to be applied.
+                          key_prefix_equals               = optional(string) #  (Optional, Required if http_error_code_returned_equals is not specified) The object key name prefix when the redirect is applied. If specified with http_error_code_returned_equals, then both must be true for the redirect to be applied.
+                        }
+                      )
+                    )
+                    redirect = optional( #  (Required) A configuration block for redirect information detailed below.
+                      object(
+                        {
+                          host_name               = optional(string) # (Optional) The host name to use in the redirect request.
+                          http_redirect_code      = optional(string) # (Optional) The HTTP redirect code to use on the response.
+                          protocol                = optional(string) #  (Optional) Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: http, https.
+                          replace_key_prefix_with = optional(string) #  (Optional, Conflicts with replace_key_with) The object key prefix to use in the redirect request. For example, to redirect requests for all pages with prefix docs/ (objects in the docs/ folder) to documents/, you can set a condition block with key_prefix_equals set to docs/ and in the redirect set replace_key_prefix_with to /documents.
+                          replace_key_with        = optional(string) # (Optional, Conflicts with replace_key_prefix_with) The specific object key to use in the redirect request. For example, redirect request to error.html.
+                        }
+                      )
+                    )
+                  }
+                )
+              )
+            }
+          )
+        )
       }
     )
   )
