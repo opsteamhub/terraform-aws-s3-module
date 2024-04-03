@@ -1,84 +1,86 @@
-resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
-  for_each = { for k, v in local.bucket_config :
-    k => v if length(v["lifecycle_config"]["rule"]) > 0 # se for verdadeiro entra no for_each   
+resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle_configuration" {
+  depends_on = [aws_s3_bucket.bucket, data.aws_s3_bucket.bucket]
+
+  for_each = {
+    for key, value in var.config : key => value
+    if value.bucket_lifecycle != null
   }
 
-  bucket = each.key # Required        
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
-  dynamic "rule" { # Required
-    for_each = each.value["lifecycle_config"]["rule"] != null ? each.value["lifecycle_config"]["rule"] : []
+  expected_bucket_owner = try(each.value.bucket_lifecycle.expected_bucket_owner, null)
+  dynamic "rule" {
+    for_each = each.value.bucket_lifecycle.rule != null ? each.value.bucket_lifecycle.rule : []
     content {
-
-      id = rule.value["id"] # Required
-
-      status = rule.value["status"] # Required
-
       dynamic "abort_incomplete_multipart_upload" {
-        for_each = rule.value["abort_incomplete_multipart_upload"] != null ? tomap({ "abort_incomplete_multipart_upload" = rule.value["abort_incomplete_multipart_upload"] }) : {}
+        for_each = rule.value.abort_incomplete_multipart_upload != null ? tomap({ "abort_incomplete_multipart_upload" = rule.value.abort_incomplete_multipart_upload }) : {}
         content {
-          days_after_initiation = rule.value["abort_incomplete_multipart_upload"]["days_after_initiation"]
+          days_after_initiation = try(abort_incomplete_multipart_upload.value.days_after_initiation, null)
         }
       }
 
       dynamic "expiration" {
-        for_each = rule.value["expiration"] != null ? tomap({ "expiration" = rule.value["expiration"] }) : {}
-        // for_each = toset([rule.value["expiration"]]) // Funciona, mas não é o jeito mais elegante de ser feito
+        for_each = rule.value.expiration != null ? tomap({ "expiration" = rule.value.expiration }) : {}
         content {
-          date                         = try(expiration.value["date"], null)
-          days                         = try(expiration.value["days"], null)
-          expired_object_delete_marker = try(expiration.value["expired_object_delete_marker"], null)
+          date = try(expiration.value.date, null)
+          # day = try(expiration.value.day, null) # Está na documentação, mas inserir no codigo temos o erro de Unexpected attribute
+          expired_object_delete_marker = try(expiration.value.expired_object_delete_marker, null)
         }
       }
 
       dynamic "filter" {
-        for_each = rule.value["filter"] != null ? tomap({ "filter" = rule.value["filter"] }) : {}
-        // for_each = toset([rule.value["expiration"]]) // Funciona, mas não é o jeito elegante de ser feito
+        for_each = rule.value.filter != null ? tomap({ "filter" = rule.value.filter }) : {}
         content {
-          object_size_greater_than = try(filter.value["object_size_greater_than"], null)
-          object_size_less_than    = try(filter.value["object_size_less_than"], null)
-          prefix                   = try(filter.value["prefix"], null)
-          dynamic "tag" {
-            for_each = filter.value["tag"] != null ? tomap({ "tag" = filter.value["tag"] }) : {}
-            content {
-              key   = try(tag.value["key"], null)
-              value = try(tag.value["value"], null)
-            }
-          }
-          and {
-            object_size_greater_than = try(filter.value["and"]["object_size_greater_than"], null)
-            object_size_less_than    = try(filter.value["and"]["object_size_less_than"], null)
-            prefix                   = try(filter.value["and"]["prefix"], null)
-            tags                     = try(filter.value["and"]["tags"], null)
-          }
+          # and = try(filter.value.and, null) # Está na documentação, mas inserir no codigo temos o erro de Unexpected attribute
+
+          object_size_greater_than = try(filter.value.object_size_greater_than, null)
+
+          object_size_less_than = try(filter.value.object_size_less_than, null)
+
+          prefix = try(filter.value.prefix, null)
+
+          # tag = try(filter.value.tag, null) # Está na documentação, mas inserir no codigo temos o erro de Unexpected attribute
         }
       }
 
+
+      id = try(rule.value.id, null)
+
       dynamic "noncurrent_version_expiration" {
-        for_each = rule.value["noncurrent_version_expiration"] != null ? tomap({ "noncurrent_version_expiration" = rule.value["noncurrent_version_expiration"] }) : {}
+        for_each = rule.value.noncurrent_version_expiration != null ? rule.value.noncurrent_version_expiration : []
         content {
-          newer_noncurrent_versions = try(noncurrent_version_expiration.value["date"], null)
-          noncurrent_days           = try(noncurrent_version_expiration.value["days"], null)
+          newer_noncurrent_versions = try(noncurrent_version_expiration.value.newer_noncurrent_versions, null)
+          noncurrent_days           = try(noncurrent_version_expiration.value.noncurrent_days, null)
         }
       }
 
       dynamic "noncurrent_version_transition" {
-        for_each = rule.value["noncurrent_version_transition"] != null ? tomap({ "noncurrent_version_transition" = rule.value["noncurrent_version_transition"] }) : {}
+        for_each = rule.value.noncurrent_version_transition != null ? rule.value.noncurrent_version_transition : []
         content {
-          newer_noncurrent_versions = try(noncurrent_version_transition.value["date"], null)
-          noncurrent_days           = try(noncurrent_version_transition.value["days"], null)
-          storage_class             = try(noncurrent_version_transition.value["storage_class"], null)
+          newer_noncurrent_versions = try(noncurrent_version_transition.value.newer_noncurrent_versions, null)
+          noncurrent_days           = try(noncurrent_version_transition.value.noncurrent_days, null)
+          storage_class             = try(noncurrent_version_transition.value.storage_class, null)
         }
       }
 
+      #
+      # DEPRECATED
+      #
+      # prefix = try(rule.value.prefix, null)
+
+      status = try(rule.value.status, null)
+
       dynamic "transition" {
-        for_each = rule.value["transition"] != null ? tomap({ "transition" = rule.value["transition"] }) : {}
+        for_each = rule.value.transition != null ? rule.value.transition : []
         content {
-          date          = try(transition.value["date"], null)
-          days          = try(transition.value["days"], null)
-          storage_class = try(transition.value["storage_class"], null)
+          date          = try(transition.value.date, null)
+          days          = try(transition.value.days, null)
+          storage_class = try(transition.value.storage_class, null)
         }
       }
     }
+
   }
 }
 

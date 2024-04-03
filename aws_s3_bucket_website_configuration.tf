@@ -1,49 +1,58 @@
 resource "aws_s3_bucket_website_configuration" "website_config" {
-  for_each = { for k, v in local.bucket_config :
-    k => v["website_config"] if v["website_config"] != null
+  depends_on = [aws_s3_bucket.bucket, data.aws_s3_bucket.bucket]
+
+  for_each = {
+    for key, value in var.config : key => value
+    if value.website_config != null
   }
 
-  bucket = each.key
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
-  dynamic "index_document" {
-    for_each = each.value["index_document"] != null ? tomap({ "index_document" = each.value["index_document"] }) : {}
+  dynamic "error_document" {
+    for_each = each.value.website_config.error_document != null ? tomap({ "error_document" = each.value.website_config.error_document }) : {}
     content {
-      suffix = index_document.value["suffix"]
+      key = try(error_document.value.key, null)
     }
   }
 
-  dynamic "error_document" {
-    for_each = each.value["error_document"] != null ? tomap({ "error_document" = each.value["error_document"] }) : {}
+  expected_bucket_owner = try(each.value.website_config.expected_bucket_owner, null)
+
+  dynamic "index_document" {
+    for_each = each.value.website_config.index_document != null ? tomap({ "index_document" = each.value.website_config.index_document }) : {}
     content {
-      key = error_document.value["key"]
+      suffix = try(index_document.value.suffix, null)
+    }
+  }
+
+  dynamic "redirect_all_requests_to" {
+    for_each = each.value.website_config.redirect_all_requests_to != null ? tomap({ "redirect_all_requests_to" = each.value.website_config.redirect_all_requests_to }) : {}
+    content {
+      host_name = try(redirect_all_requests_to.value.host_name, null)
+      protocol  = try(redirect_all_requests_to.value.protocol, null)
     }
   }
 
   dynamic "routing_rule" {
-    for_each = each.value["routing_rule"] != null ? each.value["routing_rule"] : []
-
+    for_each = each.value.website_config.routing_rule != null ? tomap({ "routing_rule" = each.value.website_config.routing_rule }) : {}
     content {
-
       dynamic "condition" {
-        for_each = routing_rule.value["condition"] != null ? [routing_rule.value["condition"]] : []
+        for_each = routing_rule.value.condition != null ? tomap({ "condition" = routing_rule.value.condition }) : {}
         content {
-          http_error_code_returned_equals = can(condition.value["http_error_code_returned_equals"]) ? condition.value["http_error_code_returned_equals"] : null
-          key_prefix_equals               = can(condition.value["key_prefix_equals"]) ? condition.value["key_prefix_equals"] : null
+          http_error_code_returned_equals = try(condition.value.http_error_code_returned_equals, null)
+          key_prefix_equals               = try(condition.value.key_prefix_equals, null)
         }
       }
-
       dynamic "redirect" {
-        for_each = routing_rule.value["redirect"] != null ? [routing_rule.value["redirect"]] : []
+        for_each = routing_rule.value.redirect != null ? tomap({ "redirect" = routing_rule.value.redirect }) : {}
         content {
-          replace_key_prefix_with = redirect.value["replace_key_prefix_with"]
-          host_name               = redirect.value["host_name"]
-          http_redirect_code      = redirect.value["http_redirect_code"]
-          protocol                = redirect.value["protocol"]
-          replace_key_with        = redirect.value["replace_key_with"]
+          host_name               = try(redirect.value.host_name, null)
+          http_redirect_code      = try(redirect.value.http_redirect_code, null)
+          protocol                = try(redirect.value.protocol, null)
+          replace_key_prefix_with = try(redirect.value.replace_key_prefix_with, null)
+          replace_key_with        = try(redirect.value.replace_key_with, null)
         }
       }
-
     }
   }
-
 }

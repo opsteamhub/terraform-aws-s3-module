@@ -1,11 +1,23 @@
 resource "aws_s3_bucket_versioning" "versioning" {
-  for_each = local.bucket_config
 
-  bucket = each.key
+  depends_on = [aws_s3_bucket.bucket, data.aws_s3_bucket.bucket]
+
+  for_each = {
+    for key, value in var.config : key => value
+    if value.versioning != null
+  }
+
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   versioning_configuration {
-    status = each.value["versioning_configuration"]["status"]
+    status     = try(each.value.versioning.versioning_configuration.status, null)
+    mfa_delete = try(each.value.versioning.versioning_configuration.mfa_delete, null)
   }
-  expected_bucket_owner = each.value["versioning_configuration"]["expected_bucket_owner"]
+
+  expected_bucket_owner = try(each.value.versioning.expected_bucket_owner, null)
+
+  mfa = try(each.value.versioning.mfa, null)
 
 }
+

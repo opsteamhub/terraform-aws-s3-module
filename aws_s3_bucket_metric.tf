@@ -1,24 +1,21 @@
 resource "aws_s3_bucket_metric" "metric" {
-  for_each = zipmap(tolist(flatten([for x, y in flatten(values(local.bucket_config)[*]["metric"]) :
-    [for z in y :
-      z
-    ]
-    ]))[*]["name"], tolist(flatten([for x, y in flatten(values(local.bucket_config)[*]["metric"]) :
-    [for z in y :
-      z
-    ]
-    ]))
-  )
+  depends_on = [aws_s3_bucket.bucket, data.aws_s3_bucket.bucket]
 
-  bucket = each.value["bucket_name"]
-  name   = each.value["name"]
-
-  dynamic "filter" {
-    for_each = each.value["filter"]
-    content {
-      prefix = filter.value["prefix"]
-      tags   = filter.value["tags"]
-    }
+  for_each = {
+    for key, value in var.config : key => value
+    if value.bucket_metric != null
   }
 
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+
+  name = try(each.value.bucket_metric.name, null)
+
+  dynamic "filter" {
+    for_each = each.value.bucket_metric.filter != null ? each.value.bucket_metric.filter : []
+    content {
+      prefix = try(filter.value.prefix, null)
+      tags   = try(filter.value.tags, null)
+    }
+  }
 }

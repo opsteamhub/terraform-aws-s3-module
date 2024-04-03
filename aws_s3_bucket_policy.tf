@@ -1,39 +1,71 @@
 data "aws_iam_policy_document" "bucket_policy" {
-  for_each = { for k, v in local.bucket_config :
-    k => v["bucket_policy"] if v["bucket_policy"] != null
+  depends_on = [aws_s3_bucket.bucket, data.aws_s3_bucket.bucket]
+
+  for_each = {
+    for key, value in var.config : key => value
+    if value.bucket_policy != null
   }
 
   dynamic "statement" {
-    for_each = each.value["statement"]
+    for_each = each.value.bucket_policy.statement
+
     content {
-      sid     = statement.value["sid"]
-      effect  = statement.value["effect"]
-      actions = statement.value["actions"]
-      resources = [for x in coalesce(statement.value["resources_prefix"], []) :
-        format("%s/%s", aws_s3_bucket.bucket[each.key].arn, x)
-      ]
-      dynamic "principals" {
-        for_each = statement.value["principals"] != null ? statement.value["principals"] : []
+
+      actions = try(statement.value["actions"], null)
+
+      dynamic "condition" {
+        for_each = statement.value["condition"] != null ? statement.value["condition"] : []
         content {
-          type        = principals.value["type"]
-          identifiers = principals.value["identifiers"]
+          test     = try(condition.value["test"], null)
+          values   = try(condition.value["values"], null)
+          variable = try(condition.value["variable"], null)
         }
       }
+
+      effect = try(statement.value["effect"], null)
+
+      not_actions = try(statement.value["not_actions"], null)
+
       dynamic "not_principals" {
         for_each = statement.value["not_principals"] != null ? statement.value["not_principals"] : []
         content {
-          type        = not_principals.value["type"]
-          identifiers = not_principals.value["identifiers"]
+          type        = try(not_principals.value["type"], null)
+          identifiers = try(not_principals.value["identifiers"], null)
         }
       }
+
+      not_resources = try(statement.value["not_resources"], null)
+
+      dynamic "principals" {
+        for_each = statement.value["principals"] != null ? statement.value["principals"] : []
+        content {
+          type        = try(principals.value["type"], null)
+          identifiers = try(principals.value["identifiers"], null)
+        }
+      }
+
+      resources = try(statement.value["resources"], null)
+
+      sid = try(statement.value["sid"], null)
+
     }
   }
 }
 
+
 resource "aws_s3_bucket_policy" "bucket_policy" {
-  for_each = { for k, v in local.bucket_config :
-    k => v["bucket_policy"] if v["bucket_policy"] != null
+
+  depends_on = [data.aws_iam_policy_document.bucket_policy]
+
+  for_each = {
+    for key, value in var.config : key => value
+    if value.bucket_policy != null
   }
-  bucket = each.key
+
+  bucket = each.value.bucket
+  # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
+
   policy = data.aws_iam_policy_document.bucket_policy[each.key].json
+
 }
+
