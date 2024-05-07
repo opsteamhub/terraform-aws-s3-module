@@ -4,7 +4,7 @@ resource "aws_s3_bucket" "bucket" {
     for key, value in var.config : key => value if coalesce(value.create_bucket, true)
   }
 
-  bucket = each.value["bucket"]
+  bucket = coalesce(each.value["bucket"], each.key)
 
   bucket_prefix = each.value["bucket_prefix"]
 
@@ -22,6 +22,6 @@ data "aws_s3_bucket" "bucket" {
     for key, value in var.config : key => value if !coalesce(value.create_bucket, true)
   }
 
-  bucket = each.value["bucket"]
+  bucket = coalesce(each.value["bucket"], each.key)
 }
 

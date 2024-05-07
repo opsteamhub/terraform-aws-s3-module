@@ -12,7 +12,7 @@ resource "aws_s3_bucket_policy" "replication_destination_bucket_policy" {
     if try(value.replication != null && value.replication.external_account_info.role_arn != null && value.bucket_policy == null, false)
   }
 
-  bucket = each.value.bucket
+  bucket = coalesce(each.value["bucket"], each.key)
 
   policy = jsonencode(
     {
@@ -25,7 +25,7 @@ resource "aws_s3_bucket_policy" "replication_destination_bucket_policy" {
             AWS = "${each.value.replication.external_account_info.role_arn}"
           },
           Action   = ["s3:ReplicateObject", "s3:ReplicateDelete"],
-          Resource = "arn:aws:s3:::${each.value.bucket}/*",
+          Resource = "arn:aws:s3:::${coalesce(each.value["bucket"], each.key)}/*",
         },
         {
           Sid    = "Set-permissions-on-bucket",
@@ -38,7 +38,7 @@ resource "aws_s3_bucket_policy" "replication_destination_bucket_policy" {
             "s3:GetBucketVersioning",
             "s3:PutBucketVersioning"
           ],
-          Resource = "arn:aws:s3:::${each.value.bucket}",
+          Resource = "arn:aws:s3:::${coalesce(each.value["bucket"], each.key)}",
         }
       ]
     }

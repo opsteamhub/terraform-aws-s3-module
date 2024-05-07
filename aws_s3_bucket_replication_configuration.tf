@@ -6,9 +6,9 @@ resource "aws_s3_bucket_replication_configuration" "replication" {
     if try(value.replication != null && value.replication.rule != null, false)
   }
 
-  bucket = each.value.bucket
+  bucket = coalesce(each.value["bucket"], each.key)
 
-  role = "arn:aws:iam::${data.aws_caller_identity.current_session.account_id}:role/tf-role-replication-${each.value.bucket}"
+  role = "arn:aws:iam::${data.aws_caller_identity.current_session.account_id}:role/tf-role-replication-${coalesce(each.value["bucket"], each.key)}"
 
   rule {
     delete_marker_replication { # Terraform documentation page define it as optional, however if you do not set this parameter, you receive an error message (The argument "xxxxx" is required, but no definition was found). Thus, we set as Required. 

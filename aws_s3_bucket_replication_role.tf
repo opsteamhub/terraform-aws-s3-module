@@ -8,7 +8,7 @@ resource "aws_iam_policy" "replication" {
     if try(value.replication != null && value.replication.rule != null, false)
   }
 
-  name = "tf-policy-replication-${each.value.bucket}"
+  name = "tf-policy-replication-${coalesce(each.value["bucket"], each.key)}"
 
   policy = jsonencode(
     {
@@ -26,8 +26,8 @@ resource "aws_iam_policy" "replication" {
           ]
           Effect = "Allow"
           Resource = [
-            "arn:aws:s3:::${each.value.bucket}",
-            "arn:aws:s3:::${each.value.bucket}/*",
+            "arn:aws:s3:::${coalesce(each.value["bucket"], each.key)}",
+            "arn:aws:s3:::${coalesce(each.value["bucket"], each.key)}/*",
             "arn:aws:s3:::${each.value.replication.rule.destination.bucket}",
             "arn:aws:s3:::${each.value.replication.rule.destination.bucket}/*"
           ]
@@ -41,7 +41,7 @@ resource "aws_iam_policy" "replication" {
           ],
           Effect : "Allow",
           Resource = [
-            "arn:aws:s3:::${each.value.bucket}/*",
+            "arn:aws:s3:::${coalesce(each.value["bucket"], each.key)}/*",
             "arn:aws:s3:::${each.value.replication.rule.destination.bucket}/*"
           ]
         }
@@ -58,7 +58,7 @@ resource "aws_iam_role" "replication" {
     if try(value.replication != null && value.replication.rule != null, false)
   }
 
-  name = "tf-role-replication-${each.value.bucket}"
+  name = "tf-role-replication-${coalesce(each.value["bucket"], each.key)}"
 
   description = "This policy is designed to ensure the IAM role can access and perform replication tasks between the specified buckets efficiently and securely."
 

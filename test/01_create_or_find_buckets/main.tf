@@ -15,10 +15,15 @@ module "opsteam-testecase" {
         Environment = "Dev"
       }
     },
-    bucket02 = {
-      bucket        = "opsteam-testecase-b"
-      create_bucket = false
+    "opsteam-testecase-b" = {
+      # Método alternativo de criar bucket, sem usar nenhum argumento. Nesse caso será usado a chave do map como nome do bucket
+
     },
+    # bucket03 = {
+    #   # Nesse exemplo nós não criamos o bucket, mas sim usamos um bucket já existente
+    #   bucket        = "opsteam-testecase-c"
+    #   create_bucket = false
+    # },
   }
 }
 

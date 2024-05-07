@@ -6,7 +6,7 @@ resource "aws_s3_bucket_cors_configuration" "bucket_cors" {
     if value.bucket_cors != null
   }
 
-  bucket = each.value.bucket
+  bucket = coalesce(each.value["bucket"], each.key)
   # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   dynamic "cors_rule" {
