@@ -6,7 +6,7 @@ resource "aws_s3_bucket_logging" "bucket_logging" {
     if value.bucket_logging != null
   }
 
-  bucket = coalesce(each.value["bucket"], each.key)
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
   # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   expected_bucket_owner = try(each.value.bucket_logging.expected_bucket_owner, null)
