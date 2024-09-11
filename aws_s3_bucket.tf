@@ -4,7 +4,7 @@ resource "aws_s3_bucket" "bucket" {
     for key, value in var.config : key => value if coalesce(value.create_bucket, true)
   }
 
-  bucket = coalesce(each.value["bucket"], each.key)
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
 
   bucket_prefix = each.value["bucket_prefix"]
 
