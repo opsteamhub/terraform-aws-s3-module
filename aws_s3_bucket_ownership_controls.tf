@@ -12,3 +12,4 @@ resource "aws_s3_bucket_ownership_controls" "ownership_control" {
 
   }
 }
+
