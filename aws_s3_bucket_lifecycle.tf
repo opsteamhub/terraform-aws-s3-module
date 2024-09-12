@@ -6,7 +6,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle_configuration
     if value.bucket_lifecycle != null
   }
 
-  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : aws_s3_bucket.bucket[each.key].id
   # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   expected_bucket_owner = try(each.value.bucket_lifecycle.expected_bucket_owner, null)

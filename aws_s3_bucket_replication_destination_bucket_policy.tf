@@ -12,7 +12,7 @@ resource "aws_s3_bucket_policy" "replication_destination_bucket_policy" {
     if try(value.replication != null && value.replication.external_account_info.role_arn != null && value.bucket_policy == null, false)
   }
 
-  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : aws_s3_bucket.bucket[each.key].id
 
   policy = jsonencode(
     {

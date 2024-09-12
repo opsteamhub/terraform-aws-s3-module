@@ -6,7 +6,7 @@ resource "aws_s3_bucket_replication_configuration" "replication" {
     if try(value.replication != null && value.replication.rule != null, false)
   }
 
-  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : aws_s3_bucket.bucket[each.key].id
 
   role = "arn:aws:iam::${data.aws_caller_identity.current_session.account_id}:role/tf-role-replication-${coalesce(each.value["bucket"], each.key)}"
 
