@@ -1,5 +1,4 @@
-
-
+### Resource for ACL
 resource "aws_s3_bucket_ownership_controls" "bucket_ownership_control" {
 
   for_each = {
@@ -7,7 +6,7 @@ resource "aws_s3_bucket_ownership_controls" "bucket_ownership_control" {
     if value.bucket_acl != null
   }
 
-  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : aws_s3_bucket.bucket[each.key].id
   # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   rule {
@@ -15,7 +14,6 @@ resource "aws_s3_bucket_ownership_controls" "bucket_ownership_control" {
   }
 
 }
-
 
 resource "aws_s3_bucket_acl" "bucket_acl" {
   depends_on = [aws_s3_bucket.bucket, data.aws_s3_bucket.bucket]
@@ -25,7 +23,7 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
     if value.bucket_acl != null
   }
 
-  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : aws_s3_bucket.bucket[each.key].id
   # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   acl = try(each.value.bucket_acl.acl, null)
