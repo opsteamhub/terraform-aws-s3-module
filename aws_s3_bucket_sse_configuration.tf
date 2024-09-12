@@ -5,7 +5,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "sse_config" {
     if value.sse_config != null
   }
 
-  bucket = coalesce(each.value["bucket"], each.key)
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
 
   expected_bucket_owner = try(each.value.sse_config.expected_bucket_owner, null)
 

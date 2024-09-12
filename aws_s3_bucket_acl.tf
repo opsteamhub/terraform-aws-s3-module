@@ -7,7 +7,7 @@ resource "aws_s3_bucket_ownership_controls" "bucket_ownership_control" {
     if value.bucket_acl != null
   }
 
-  bucket = coalesce(each.value["bucket"], each.key)
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
   # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   rule {
@@ -25,7 +25,7 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
     if value.bucket_acl != null
   }
 
-  bucket = coalesce(each.value["bucket"], each.key)
+  bucket = each.value["bucket_prefix"] == null ? coalesce(each.value["bucket"], each.key) : null
   # bucket = coalesce(each.value.create_bucket, true) ? aws_s3_bucket.bucket[each.key].id : data.aws_s3_bucket.bucket[each.key].id
 
   acl = try(each.value.bucket_acl.acl, null)
